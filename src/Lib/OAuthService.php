@@ -8,8 +8,9 @@ use Camoo\Cache\CacheConfig;
 use Enkap\OAuth\Exception\EnKapAccessTokenException;
 use Enkap\OAuth\Http\Client;
 use Enkap\OAuth\Http\ClientFactory;
+use Enkap\OAuth\Interfaces\ModelInterface;
+use Enkap\OAuth\Model\Token;
 use GuzzleHttp\Exception\GuzzleException;
-use stdClass;
 use Throwable;
 
 
@@ -33,15 +34,17 @@ class OAuthService
     {
         $this->consumerKey = $consumerKey;
         $this->consumerSecret = $consumerSecret;
-        $this->cache = new Cache(CacheConfig::fromArray(['crypto_salt' => $_ENV['CRYPTO_SALT']]));
+        $cryptoSalt = $_ENV['CRYPTO_SALT'] ?? null;
+        $cacheEncrypt = null !== $cryptoSalt;
+        $this->cache = new Cache(CacheConfig::fromArray(['crypto_salt' => $cryptoSalt, 'encrypt' => $cacheEncrypt]));
     }
 
     protected function getClient(): Client
     {
-        return call_user_func([ClientFactory::class, 'create']);
+        return call_user_func([ClientFactory::class, 'create'], 'Token');
     }
 
-    public function getAccessToken() : string
+    public function getAccessToken(): string
     {
         $accessToken = $this->cache->read('token');
         if ($accessToken === false) {
@@ -60,22 +63,22 @@ class OAuthService
                     'Access Token cannot be retrieved. Please check your credentials'
                 );
             }
-            $accessToken = $response->access_token;
-            $expiresIn = $response->expires_in;
+            $accessToken = $response->getAccessToken();
+            $expiresIn = $response->getExpiresIn();
             $this->cache->write('token', $accessToken, $expiresIn);
         }
         return $accessToken;
     }
 
-
     /**
+     * @return ModelInterface|null|Token
      * @throws GuzzleException
      */
-    protected function apiCall(): ?StdClass
+    protected function apiCall(): ?ModelInterface
     {
         $header = [
             'Authorization' => 'Basic ' . base64_encode(
-                sprintf('%s:%s', $this->consumerKey, $this->consumerSecret)
+                    sprintf('%s:%s', $this->consumerKey, $this->consumerSecret)
                 )
         ];
         $response = $this->getClient()->post('/token', ['grant_type' => 'client_credentials',], $header);
@@ -83,6 +86,6 @@ class OAuthService
             return null;
         }
 
-        return $response->getJson();
+        return $response->getResult()->firstOrFail();
     }
 }

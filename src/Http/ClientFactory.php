@@ -13,8 +13,8 @@ class ClientFactory
     {
     }
 
-    public function create(int $timeOut = 0): Client
+    public function create(?string $model = null, int $timeOut = 0): Client
     {
-        return new Client($timeOut);
+        return new Client($model, $timeOut);
     }
 }

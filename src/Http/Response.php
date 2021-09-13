@@ -18,12 +18,6 @@ class Response
     /** @var string $content */
     private $content;
 
-    /** @var string */
-    const BAD_STATUS = 'KO';
-
-    /** @var string */
-    const GOOD_STATUS = 'OK';
-
     /** @var Json $jsonData */
     protected $jsonData;
     /**
@@ -72,11 +66,9 @@ class Response
     {
         if ($this->getStatusCode() !== 200) {
             $message = $this->content !== '' ? $this->content : 'request failed!';
-            return (object)['status' => static::BAD_STATUS, 'message' => $message];
+            return (object)['message' => $message];
         }
-       $result = $this->jsonData->decode();
-        $result->status = self::GOOD_STATUS;
-        return $result;
+        return $this->jsonData->decode();
     }
 
 }

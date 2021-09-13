@@ -11,8 +11,5 @@ if (is_file(dirname(__DIR__) . '/config/.env') &&
     $dotenv->required(['CRYPTO_SALT']);
 }
 
-const ENKAP_DS = DIRECTORY_SEPARATOR;
-const ENKAP_CLIENT_VERSION = 1.2;
-
 
 

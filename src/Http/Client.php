@@ -3,14 +3,14 @@ declare(strict_types=1);
 
 namespace Enkap\OAuth\Http;
 
+use Enkap\OAuth\Exception\EnkapBadResponseException;
 use Enkap\OAuth\Exception\EnkapHttpClientException;
 use Enkap\OAuth\Lib\Helper;
+use Enkap\OAuth\Model\ModelCollection;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Client as GuzzleClient;
 use Valitron\Validator;
-
-use const ENKAP_CLIENT_VERSION;
 
 /**
  * Class Client
@@ -21,6 +21,9 @@ class Client
     private const POST_REQUEST = 'POST';
     private const ENKAP_API_URL = 'https://api.enkap.cm';
     private const ENKAP_CLIENT_TIMEOUT = 30;
+    private const ENKAP_CLIENT_VERSION = 1.0;
+    private $model;
+
 
     /**
      * @var array
@@ -45,11 +48,11 @@ class Client
     /**
      * @param int|null $timeout > 0
      */
-    public function __construct(?int $timeout = null)
+    public function __construct(?string $model = null, ?int $timeout = null)
     {
         $this->addUserAgentString($this->getAPIInfo());
         $this->addUserAgentString(Helper::getPhpVersion());
-
+        $this->model = $model;
         if (!is_int($timeout) || $timeout < 0) {
             throw new EnkapHttpClientException(sprintf(
                 'Connection timeout must be an int >= 0, got "%s".',
@@ -100,7 +103,7 @@ class Client
      * @param null $oClient
      *
      *
-     * @return Response
+     * @return ModelResponse
      * @throws GuzzleException
      */
     protected function performRequest(
@@ -109,7 +112,7 @@ class Client
         array  $data = [],
         array  $headers = [],
                $oClient = null
-    ): Response
+    ): ModelResponse
     {
         $this->setHeader($headers);
         //VALIDATE HEADERS
@@ -121,11 +124,8 @@ class Client
 
         $validateRequest = $this->validatorDefault($oValidator);
         if ($validateRequest === false) {
-            var_dump($oValidator->errors());
-
             throw new EnkapHttpClientException(json_encode($oValidator->errors()));
         }
-
 
         try {
             $client = null === $oClient ? new GuzzleClient(['timeout' => $this->timeout]) : $oClient;
@@ -134,8 +134,21 @@ class Client
                     'headers' => $hHeaders
                 ]
             );
+            if ($oResponse->getStatusCode() !== 200 ) {
+                throw new EnkapBadResponseException((string) $oResponse->getBody());
+            }
 
-            return new Response((string)$oResponse->getBody(), $oResponse->getStatusCode(), $oResponse->getHeaders());
+            $response = new Response(
+                (string)$oResponse->getBody(),
+                $oResponse->getStatusCode(),
+                $oResponse->getHeaders()
+            );
+
+            return new ModelResponse(
+                ModelCollection::create([$response->getJson()], $this->model),
+                $response->getStatusCode(),
+                $response->getHeaders()
+            );
 
         } catch (RequestException $exception) {
             throw new EnkapHttpClientException($exception->getMessage(),
@@ -168,16 +181,16 @@ class Client
             if ($wp_version) {
                 $sWPV = $wp_version;
             }
-            $sIdentity = 'WP' . $sWPV . '/SmobilPay' . WP_ENKAP_VERSION . ENKAP_DS;
+            $sIdentity = 'WP' . $sWPV . '/SmobilPay' . WP_ENKAP_VERSION . DIRECTORY_SEPARATOR;
         }
-        return $sIdentity . ENKAP_CLIENT_VERSION;
+        return $sIdentity . self::ENKAP_CLIENT_VERSION;
     }
 
 
     /**
      * @throws GuzzleException
      */
-    public function post(string $url, array $data = [], array $headers = []): Response
+    public function post(string $url, array $data = [], array $headers = []): ModelResponse
     {
         return $this->performRequest(self::POST_REQUEST, $url, $data, $headers);
     }
@@ -185,7 +198,7 @@ class Client
     /**
      * @throws GuzzleException
      */
-    public function get(string $url, array $data = [], array $headers = []): Response
+    public function get(string $url, array $data = [], array $headers = []): ModelResponse
     {
         return $this->performRequest(self::GET_REQUEST, $url, $data, $headers);
     }
