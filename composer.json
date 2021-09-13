@@ -21,7 +21,7 @@
     "Plugin camoo Pay",
     "MTN Mobile Money",
     "SmobilPay",
-    "E-nkap, enkap"
+    "enkap"
   ],
   "autoload": {
     "psr-4": {
