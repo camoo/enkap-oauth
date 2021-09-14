@@ -74,7 +74,6 @@ try {
 } catch (\Throwable $e) {
     var_dump($e->getMessage());
 }
-var_dump($service->getAccessToken());
 ```
 
 ## Check Payment Status
