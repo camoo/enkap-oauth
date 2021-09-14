@@ -10,7 +10,7 @@ composer require camoo/enkap-oauth
 ## Usage
 
 ```php
-use Enkap\OAuth\Lib\OAuthService;
+use Enkap\OAuth\Services\OAuthService;
 
 $consumerKey = 'hqBvUfOjdLoP04763L_LDO';
 $consumerSecret = 'FwxKTJzN4jE8IYdeCM83';

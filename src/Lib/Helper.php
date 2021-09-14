@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Enkap\OAuth\Lib;
 
+use Composer\InstalledVersions;
 use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Exception\BadFormatException;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
@@ -17,6 +18,9 @@ use Enkap\OAuth\Exception\EnkapException;
  */
 final class Helper
 {
+    private const ENKAP_CLIENT_VERSION = 1.0;
+    private const PACKAGE_NAME         = 'camoo/enkap-oauth';
+
     public static function sataniser($str, $keep_newlines = false)
     {
         if (is_object($str) || is_array($str)) {
@@ -149,5 +153,75 @@ final class Helper
         return 'PHP/' . PHP_VERSION_ID;
     }
 
+    public static function isAssoc(array $array): bool
+    {
+        return (bool)count(array_filter(array_keys($array), 'is_string'));
+    }
 
+    /**
+     * Generic function to flatten an associative array into an arbitrarily
+     * delimited string.
+     *
+     * @param array $array
+     * @param string $format
+     * @param string|null $glue
+     * @param bool $escape
+     *
+     * @return array|string if no glue provided, it won't be imploded
+     */
+    public static function flattenAssocArray(
+        array $array,
+        string $format,
+        ?string $glue = null,
+        bool $escape = true
+    ) {
+        $pairs = [];
+        foreach ($array as $key => $val) {
+            if ($escape) {
+                $key = self::escape($key);
+                $val = self::escape($val);
+            }
+            $pairs[] = sprintf($format, $key, $val);
+        }
+
+        //Return array if no glue provided
+        if ($glue === null) {
+            return $pairs;
+        }
+
+        return implode($glue, $pairs);
+    }
+
+    /**
+     * @param $string
+     *
+     * @return string
+     */
+    public static function escape($string): string
+    {
+        return rawurlencode($string);
+    }
+
+    /**
+     * @return string
+     */
+    public static function getPackageVersion()
+    {
+        if (!is_callable('\\Composer\\InstalledVersions::getPrettyVersion')) {
+            return self::ENKAP_CLIENT_VERSION;
+        }
+
+        return InstalledVersions::getPrettyVersion(self::PACKAGE_NAME);
+    }
+
+    public static function camelize(string $string, $capitalizeFirstCharacter = false)
+    {
+        $str = str_replace('_', '', ucwords($string, '_'));
+
+        if (!$capitalizeFirstCharacter) {
+            $str = lcfirst($str);
+        }
+
+        return $str;
+    }
 }

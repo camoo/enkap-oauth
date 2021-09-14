@@ -6,34 +6,42 @@ namespace Enkap\OAuth\Model;
 use ArrayIterator;
 use Enkap\OAuth\Exception\EnkapModelNotFoundException;
 use Enkap\OAuth\Interfaces\ModelInterface;
+use Enkap\OAuth\Lib\Json;
 use IteratorAggregate;
-use StdClass;
 
 class ModelCollection implements IteratorAggregate
 {
-    /** @var array $values */
+    /** @var ModelInterface[]|string[] $values */
     private $values = [];
 
-    private function __construct(array $items, string $returnType)
+    private function __construct(array $items, ?string $returnType)
     {
         foreach ($items as $value) {
             $this->add($value, $returnType);
         }
     }
 
-    public static function create(array $items, string $returnType): ModelCollection
+    public static function create(array $items, ?string $returnType): ModelCollection
     {
         return new self($items, $returnType);
     }
 
-    public function add(StdClass $item, ?string $returnType = null): void
+    public function add(array $item, ?string $returnType = null): void
     {
         if (empty($returnType)) {
             $this->values[] = $item;
             return;
         }
+
+        if (!empty($item->message)) {
+            $json = new Json($item->message);
+            $item = $json->decode();
+        }
+
         $class = __NAMESPACE__ . '\\' . $returnType;
-        $this->values[] = new $class($item);
+        $model = new $class();
+        $model->fromStringArray($item);
+        $this->values[] = $model;
     }
 
     public function getIterator(): ArrayIterator
@@ -57,6 +65,9 @@ class ModelCollection implements IteratorAggregate
         return $this->values[$position];
     }
 
+    /**
+     * @return ModelInterface
+     */
     public function firstOrFail(): ModelInterface
     {
         if (empty($this->values)) {

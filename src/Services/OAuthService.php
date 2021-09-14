@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Enkap\OAuth\Lib;
+namespace Enkap\OAuth\Services;
 
 use Camoo\Cache\Cache;
 use Camoo\Cache\CacheConfig;
@@ -12,7 +12,6 @@ use Enkap\OAuth\Interfaces\ModelInterface;
 use Enkap\OAuth\Model\Token;
 use GuzzleHttp\Exception\GuzzleException;
 use Throwable;
-
 
 class OAuthService
 {
@@ -78,8 +77,8 @@ class OAuthService
     {
         $header = [
             'Authorization' => 'Basic ' . base64_encode(
-                    sprintf('%s:%s', $this->consumerKey, $this->consumerSecret)
-                )
+                sprintf('%s:%s', $this->consumerKey, $this->consumerSecret)
+            )
         ];
         $response = $this->getClient()->post('/token', ['grant_type' => 'client_credentials',], $header);
         if ($response->getStatusCode() !== 200) {

@@ -27,12 +27,16 @@ class Json
      *
      * @return array|object
      */
-    public function decode(?string $sJSON=null, bool $bAsHash = false)
+    public function decode(?string $sJSON=null, bool $bAsHash = true)
     {
         $jsonData = $sJSON ?? $this->json;
 
+
         if (null === $jsonData) {
             throw new Exception('Cannot decode on NULL');
+        }
+        if ($jsonData === '') {
+            return [];
         }
 
         if (($xData = json_decode($jsonData, $bAsHash)) !== null

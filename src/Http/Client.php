@@ -4,12 +4,16 @@ declare(strict_types=1);
 namespace Enkap\OAuth\Http;
 
 use Enkap\OAuth\Exception\EnkapBadResponseException;
+use Enkap\OAuth\Exception\EnkapException;
 use Enkap\OAuth\Exception\EnkapHttpClientException;
+use Enkap\OAuth\Interfaces\ModelInterface;
 use Enkap\OAuth\Lib\Helper;
+use Enkap\OAuth\Services\OAuthService;
 use Enkap\OAuth\Model\ModelCollection;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Psr7\Request;
 use Valitron\Validator;
 
 /**
@@ -17,13 +21,16 @@ use Valitron\Validator;
  */
 class Client
 {
-    private const GET_REQUEST = 'GET';
-    private const POST_REQUEST = 'POST';
+    public const GET_REQUEST = 'GET';
+    public const POST_REQUEST = 'POST';
+    public const PUT_REQUEST = 'PUT';
+    public const DELETE_REQUEST = 'DELETE';
     private const ENKAP_API_URL = 'https://api.enkap.cm';
     private const ENKAP_CLIENT_TIMEOUT = 30;
-    private const ENKAP_CLIENT_VERSION = 1.0;
     private $model;
-
+    private const USER_AGENT_STRING = 'Enkap/CamooClient/%s (+https://github.com/camoo/enkap-oauth)';
+    /** @var bool */
+    public const SANDBOX = true;
 
     /**
      * @var array
@@ -33,12 +40,17 @@ class Client
     /**
      * @var array
      */
-    protected $hRequestVerbs = [self::GET_REQUEST => 'query', self::POST_REQUEST => 'form_params'];
+    protected $hRequestVerbs = [
+        self::GET_REQUEST => 'query',
+        self::POST_REQUEST => 'form_params',
+        self::PUT_REQUEST => null,
+        self::DELETE_REQUEST => null,
+    ];
 
     /**
      * @var int
      */
-    private $timeout = self::ENKAP_CLIENT_TIMEOUT;
+    private $timeout;
 
     /**
      * @var array
@@ -46,23 +58,15 @@ class Client
     private $_headers = [];
 
     /**
-     * @param int|null $timeout > 0
+     * @param string|null $model
+     * @param int|null $timeout
      */
     public function __construct(?string $model = null, ?int $timeout = null)
     {
         $this->addUserAgentString($this->getAPIInfo());
         $this->addUserAgentString(Helper::getPhpVersion());
         $this->model = $model;
-        if (!is_int($timeout) || $timeout < 0) {
-            throw new EnkapHttpClientException(sprintf(
-                'Connection timeout must be an int >= 0, got "%s".',
-                is_object($timeout) ? get_class($timeout) : gettype($timeout) . ' ' .
-                    var_export($timeout, true)
-            ));
-        }
-        if (!empty($timeout)) {
-            $this->timeout = $timeout;
-        }
+        $this->timeout = $timeout ?? self::ENKAP_CLIENT_TIMEOUT;
     }
 
     /**
@@ -111,9 +115,8 @@ class Client
         string $url,
         array  $data = [],
         array  $headers = [],
-               $oClient = null
-    ): ModelResponse
-    {
+        $oClient = null
+    ): ModelResponse {
         $this->setHeader($headers);
         //VALIDATE HEADERS
         $hHeaders = $this->getHeaders();
@@ -123,19 +126,29 @@ class Client
         $oValidator = new Validator(array_merge(['request' => $sMethod], $hHeaders));
 
         $validateRequest = $this->validatorDefault($oValidator);
+
         if ($validateRequest === false) {
             throw new EnkapHttpClientException(json_encode($oValidator->errors()));
         }
 
         try {
             $client = null === $oClient ? new GuzzleClient(['timeout' => $this->timeout]) : $oClient;
-            $oResponse = $client->request($sMethod, $endPoint,
-                [$this->hRequestVerbs[$sMethod] => $data,
-                    'headers' => $hHeaders
-                ]
-            );
-            if ($oResponse->getStatusCode() !== 200 ) {
-                throw new EnkapBadResponseException((string) $oResponse->getBody());
+
+            if (array_key_exists('Content-Type', $hHeaders) && $hHeaders['Content-Type'] === 'application/json') {
+                $request = $this->getRequest($sMethod, $endPoint, $data, $hHeaders);
+                $oResponse = $client->send($request);
+            } else {
+                $oResponse = $client->request(
+                    $sMethod,
+                    $endPoint,
+                    [$this->hRequestVerbs[$sMethod] => $data,
+                        'headers' => $hHeaders
+                    ]
+                );
+            }
+
+            if (!in_array($oResponse->getStatusCode(), [200, 201])) {
+                throw new EnkapBadResponseException((string)$oResponse->getBody());
             }
 
             $response = new Response(
@@ -144,16 +157,18 @@ class Client
                 $oResponse->getHeaders()
             );
 
+            $data = $sMethod === self::DELETE_REQUEST ? [] : [$response->getJson()];
             return new ModelResponse(
-                ModelCollection::create([$response->getJson()], $this->model),
+                ModelCollection::create($data, $this->model),
                 $response->getStatusCode(),
                 $response->getHeaders()
             );
-
         } catch (RequestException $exception) {
-            throw new EnkapHttpClientException($exception->getMessage(),
+            throw new EnkapHttpClientException(
+                $exception->getMessage(),
                 $exception->getCode(),
-                $exception->getPrevious());
+                $exception->getPrevious()
+            );
         }
     }
 
@@ -171,21 +186,10 @@ class Client
         return $this->_headers += $default;
     }
 
-
     protected function getAPIInfo(): string
     {
-        $sIdentity = 'Enkap/ApiClient/';
-        if (defined('WP_ENKAP_VERSION')) {
-            $sWPV = '';
-            global $wp_version;
-            if ($wp_version) {
-                $sWPV = $wp_version;
-            }
-            $sIdentity = 'WP' . $sWPV . '/SmobilPay' . WP_ENKAP_VERSION . DIRECTORY_SEPARATOR;
-        }
-        return $sIdentity . self::ENKAP_CLIENT_VERSION;
+        return sprintf(static::USER_AGENT_STRING, Helper::getPackageVersion());
     }
-
 
     /**
      * @throws GuzzleException
@@ -203,4 +207,64 @@ class Client
         return $this->performRequest(self::GET_REQUEST, $url, $data, $headers);
     }
 
+    /**
+     * @throws GuzzleException
+     */
+    public function put(string $url, array $data = [], array $headers = []): ModelResponse
+    {
+        return $this->performRequest(self::PUT_REQUEST, $url, $data, $headers);
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    public function delete(string $url, array $data = [], array $headers = []): ModelResponse
+    {
+        return $this->performRequest(self::DELETE_REQUEST, $url, $data, $headers);
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    public function save(ModelInterface $model, OAuthService $authService): ModelCollection
+    {
+        $model->validate();
+        $header = [
+            'Authorization' => sprintf('Bearer %s', $authService->getAccessToken()),
+            'Content-Type' => 'application/json',
+        ];
+
+        $method = $model->isMethodSupported(self::PUT_REQUEST) ? self::PUT_REQUEST : self::POST_REQUEST;
+        $suffix = $model->getResourceURI();
+        if (!self::SANDBOX) {
+            $suffix = '/v1.2/' . $suffix;
+        }
+        $uri = sprintf('/purchase%s', $suffix);
+
+        if (!$model->isMethodSupported($method)) {
+            throw new EnkapException(sprintf('%s does not support [%s] via the API', get_class($model), $method));
+        }
+
+        $data = $model->toStringArray();
+
+        $modelResponse = $this->performRequest(
+            $method,
+            $uri,
+            $data,
+            $header
+        );
+        $model->setClean();
+        return $modelResponse->getResult();
+    }
+
+    protected function getRequest(string $type, string $uri, array $data = [], array $headers = []): Request
+    {
+        $httpBody = json_encode($data);
+        return new Request(
+            $type,
+            $uri,
+            $headers,
+            $httpBody
+        );
+    }
 }

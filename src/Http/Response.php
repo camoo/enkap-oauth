@@ -60,15 +60,14 @@ class Response
     }
 
     /**
-     * @return array|object
+     * @return array
      */
-    public function getJson()
+    public function getJson(): array
     {
         if ($this->getStatusCode() !== 200) {
             $message = $this->content !== '' ? $this->content : 'request failed!';
-            return (object)['message' => $message];
+            return ['message' => $message];
         }
         return $this->jsonData->decode();
     }
-
 }

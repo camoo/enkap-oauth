@@ -13,4 +13,7 @@ interface ModelInterface
      */
     public function getModelName() : string;
 
+    public function getResourceURI() : string;
+
+    public function isMethodSupported(string $method) : bool;
 }
