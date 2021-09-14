@@ -16,4 +16,6 @@ interface ModelInterface
     public function getResourceURI() : string;
 
     public function isMethodSupported(string $method) : bool;
+
+    public static function getProperties() : array;
 }

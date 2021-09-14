@@ -96,7 +96,7 @@ class Order extends BaseModel
     public function setCurrency(string $currency): Order
     {
         $this->propertyUpdated('currency', $currency);
-        $this->_data['currency'] = $currency;
+        $this->_data['currency'] = strtoupper($currency);
 
         return $this;
     }
