@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Enkap\OAuth\Http;
 
+use Enkap\OAuth\Services\OAuthService;
+
 class ClientFactory
 {
 
@@ -13,8 +15,8 @@ class ClientFactory
     {
     }
 
-    public static function create(?string $model = null, ?int $timeout = null): Client
+    public static function create(OAuthService $authService, ?string $model = null, ?int $timeout = null): Client
     {
-        return new Client($model, $timeout);
+        return new Client($authService, $model, $timeout);
     }
 }

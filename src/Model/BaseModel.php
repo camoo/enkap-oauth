@@ -8,10 +8,9 @@ use DateTimeInterface;
 use DateTimeZone;
 use Enkap\OAuth\Exception\EnkapException;
 use Enkap\OAuth\Http\Client;
-use Enkap\OAuth\Http\ClientFactory;
+use Enkap\OAuth\Http\ModelResponse;
 use Enkap\OAuth\Interfaces\ModelInterface;
 use Enkap\OAuth\Lib\Helper;
-use Enkap\OAuth\Services\OAuthService;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -80,7 +79,12 @@ abstract class BaseModel implements ModelInterface
         $this->_dirty = [];
         $this->_data = [];
         $this->_associated_objects = [];
-        $this->client = $client ?? ClientFactory::create($this->getModelName());
+        $this->client = $client;
+    }
+
+    public function setClient(Client $client)
+    {
+        $this->client = $client;
     }
 
     /**
@@ -368,15 +372,28 @@ abstract class BaseModel implements ModelInterface
     /**
      * @throws GuzzleException
      */
-    public function save(OAuthService $authService): ModelCollection
+    public function save(): ModelResponse
     {
         if ($this->client === null) {
             throw new EnkapException(
-                '->save() is only available on objects that have an injected application context.'
+                '->save() is only available on objects that have an injected Http client context.'
             );
         }
 
-        return $this->client->save($this, $authService);
+        return $this->client->save($this);
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    public function delete(): ModelResponse
+    {
+        if ($this->client === null) {
+            throw new EnkapException(
+                '->delete() is only available on objects that have an injected Http client context.'
+            );
+        }
+        return $this->client->save($this, true);
     }
 
     /**
@@ -441,7 +458,7 @@ abstract class BaseModel implements ModelInterface
     {
         if (!isset($this->_data[$property]) || $this->_data[$property] !== $value) {
             //If this object can update itself, set its own dirty flag, otherwise, set its parent's.
-            if (count(array_intersect($this::getSupportedMethods(), [Client::PUT_REQUEST, Client::POST_REQUEST])) > 0) {
+            if (count(array_intersect(static::getSupportedMethods(), [Client::PUT_REQUEST, Client::POST_REQUEST])) > 0) {
                 //Object can update itself
                 $this->setDirty($property);
             } else {

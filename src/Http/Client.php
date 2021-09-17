@@ -27,7 +27,7 @@ class Client
     public const DELETE_REQUEST = 'DELETE';
     private const ENKAP_API_URL = 'https://api.enkap.cm';
     private const ENKAP_CLIENT_TIMEOUT = 30;
-    private $model;
+    private $returnType;
     private const USER_AGENT_STRING = 'Enkap/CamooClient/%s (+https://github.com/camoo/enkap-oauth)';
     /** @var bool */
     public const SANDBOX = true;
@@ -56,17 +56,23 @@ class Client
      * @var array
      */
     private $_headers = [];
+    /**
+     * @var OAuthService
+     */
+    private $authService;
 
     /**
-     * @param string|null $model
+     * @param OAuthService $authService
+     * @param string|null $returnType
      * @param int|null $timeout
      */
-    public function __construct(?string $model = null, ?int $timeout = null)
+    public function __construct(OAuthService $authService, ?string $returnType = null, ?int $timeout = null)
     {
         $this->addUserAgentString($this->getAPIInfo());
         $this->addUserAgentString(Helper::getPhpVersion());
-        $this->model = $model;
+        $this->returnType = $returnType;
         $this->timeout = $timeout ?? self::ENKAP_CLIENT_TIMEOUT;
+        $this->authService = $authService;
     }
 
     /**
@@ -115,8 +121,9 @@ class Client
         string $url,
         array  $data = [],
         array  $headers = [],
-        $oClient = null
-    ): ModelResponse {
+               $oClient = null
+    ): ModelResponse
+    {
         $this->setHeader($headers);
         //VALIDATE HEADERS
         $hHeaders = $this->getHeaders();
@@ -159,7 +166,7 @@ class Client
 
             $data = $sMethod === self::DELETE_REQUEST ? [] : [$response->getJson()];
             return new ModelResponse(
-                ModelCollection::create($data, $this->model),
+                ModelCollection::create($data, $this->returnType),
                 $response->getStatusCode(),
                 $response->getHeaders()
             );
@@ -202,39 +209,44 @@ class Client
     /**
      * @throws GuzzleException
      */
-    public function get(string $url, array $data = [], array $headers = []): ModelResponse
+    public function get(
+        ModelInterface $model,
+        array          $data = [],
+        ?string        $uri = null,
+        array $headers = []
+    ): ModelResponse
     {
-        return $this->performRequest(self::GET_REQUEST, $url, $data, $headers);
+        $this->returnType = $this->returnType  ?? $model->getModelName();
+        $suffix = $uri ?? $model->getResourceURI();
+        if (!self::SANDBOX) {
+            $suffix = '/v1.2/' . $suffix;
+        }
+        $uri = sprintf('/purchase%s', $suffix);
+        $header = [
+            'Authorization' => sprintf('Bearer %s', $this->authService->getAccessToken()),
+        ];
+        $headers += $header;
+        return $this->performRequest(self::GET_REQUEST, $uri, $data, $headers);
     }
 
     /**
      * @throws GuzzleException
      */
-    public function put(string $url, array $data = [], array $headers = []): ModelResponse
-    {
-        return $this->performRequest(self::PUT_REQUEST, $url, $data, $headers);
-    }
-
-    /**
-     * @throws GuzzleException
-     */
-    public function delete(string $url, array $data = [], array $headers = []): ModelResponse
-    {
-        return $this->performRequest(self::DELETE_REQUEST, $url, $data, $headers);
-    }
-
-    /**
-     * @throws GuzzleException
-     */
-    public function save(ModelInterface $model, OAuthService $authService): ModelCollection
+    public function save(ModelInterface $model, bool $delete = false): ModelResponse
     {
         $model->validate();
         $header = [
-            'Authorization' => sprintf('Bearer %s', $authService->getAccessToken()),
+            'Authorization' => sprintf('Bearer %s', $this->authService->getAccessToken()),
             'Content-Type' => 'application/json',
         ];
+        $this->returnType = $this->returnType  ?? $model->getModelName();
 
-        $method = $model->isMethodSupported(self::PUT_REQUEST) ? self::PUT_REQUEST : self::POST_REQUEST;
+        if ($delete === true) {
+            $method = self::DELETE_REQUEST;
+        } else {
+            $method = $model->isMethodSupported(self::PUT_REQUEST) ? self::PUT_REQUEST : self::POST_REQUEST;
+        }
+
         $suffix = $model->getResourceURI();
         if (!self::SANDBOX) {
             $suffix = '/v1.2/' . $suffix;
@@ -254,7 +266,7 @@ class Client
             $header
         );
         $model->setClean();
-        return $modelResponse->getResult();
+        return $modelResponse;
     }
 
     protected function getRequest(string $type, string $uri, array $data = [], array $headers = []): Request

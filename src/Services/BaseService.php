@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Enkap\OAuth\Services;
 
-use Enkap\OAuth\Http\Client;
 use Enkap\OAuth\Http\ClientFactory;
 use Enkap\OAuth\Http\ModelResponse;
 use Enkap\OAuth\Interfaces\ModelInterface;
@@ -25,17 +24,10 @@ class BaseService
     /**
      * @throws GuzzleException
      */
-    public function get(ModelInterface $model, array $data = [], ?string $uri = null): ModelResponse
+    public function get(ModelInterface $model, array $data): ModelResponse
     {
-        $client = ClientFactory::create($model->getModelName());
-        $suffix = $uri ?? $model->getResourceURI();
-        if (!Client::SANDBOX) {
-            $suffix = '/v1.2/' . $suffix;
-        }
-        $uri = sprintf('/purchase%s', $suffix);
-        $header = [
-            'Authorization' => sprintf('Bearer %s', $this->authService->getAccessToken()),
-        ];
-        return $client->get($uri, $data, $header);
+        $client = ClientFactory::create($this->authService);
+        return $client->get($model, $data);
     }
+
 }

@@ -6,13 +6,13 @@ namespace Enkap\OAuth\Services;
 use Enkap\OAuth\Model\CallbackUrl;
 use Throwable;
 
-class SetupService extends BaseService
+class CallbackUrlService extends BaseService
 {
 
-    public function setCallbackUrls(CallbackUrl $callbackUrl): bool
+    public function set(CallbackUrl $callbackUrl): bool
     {
         try {
-            $callbackUrl->save($this->authService);
+            $callbackUrl->save();
         } catch (Throwable $e) {
             return false;
         }

@@ -5,8 +5,10 @@ namespace Enkap\OAuth\Model;
 
 use DateTimeInterface;
 use Enkap\OAuth\Http\Client;
+use Enkap\OAuth\Http\ModelResponse;
 use Enkap\OAuth\Model\Asset\LineItem;
 use Enkap\OAuth\Model\Asset\OID;
+use Enkap\OAuth\Services\OAuthService;
 
 /**
  * @property string $currency
@@ -30,6 +32,7 @@ use Enkap\OAuth\Model\Asset\OID;
 class Order extends BaseModel
 {
     private const MODEL_NAME = 'Order';
+    private $uri = '/api/order';
 
     public function getModelName(): string
     {
@@ -44,6 +47,7 @@ class Order extends BaseModel
         return [
             Client::GET_REQUEST,
             Client::POST_REQUEST,
+            Client::DELETE_REQUEST,
         ];
     }
 
@@ -77,15 +81,8 @@ class Order extends BaseModel
             'merchantReferenceId' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
             'orderTransactionId' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
             'redirectUrl' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
-            'order' => [false, self::PROPERTY_TYPE_OBJECT, Order::class, false, false],
             'paymentStatus' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
-            'status' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
         ];
-    }
-
-    public function getOrderResult() : self
-    {
-        return $this->_data['order'];
     }
 
     public function getCurrency(): string
@@ -291,11 +288,17 @@ class Order extends BaseModel
 
     public function getPaymentStatus(): string
     {
-        return $this->_data['paymentStatus'] ?? $this->_data['status'];
+        return $this->_data['paymentStatus'];
     }
 
     public function getResourceURI(): string
     {
-        return '/api/order';
+        return $this->uri;
+    }
+
+    public function delete(): ModelResponse
+    {
+        $this->uri .= '/' . $this->getOrderTransactionId();
+        return parent::delete();
     }
 }

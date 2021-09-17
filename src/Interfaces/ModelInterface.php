@@ -18,4 +18,6 @@ interface ModelInterface
     public function isMethodSupported(string $method) : bool;
 
     public static function getProperties() : array;
+
+    public static function getSupportedMethods() : array;
 }

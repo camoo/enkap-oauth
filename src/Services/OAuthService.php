@@ -40,7 +40,7 @@ class OAuthService
 
     protected function getClient(): Client
     {
-        return call_user_func([ClientFactory::class, 'create'], 'Token');
+        return call_user_func([ClientFactory::class, 'create'], $this, 'Token');
     }
 
     public function getAccessToken(): string
