@@ -8,7 +8,6 @@ use Enkap\OAuth\Http\Client;
 use Enkap\OAuth\Http\ModelResponse;
 use Enkap\OAuth\Model\Asset\LineItem;
 use Enkap\OAuth\Model\Asset\OID;
-use Enkap\OAuth\Services\OAuthService;
 
 /**
  * @property string $currency
@@ -64,20 +63,21 @@ class Order extends BaseModel
     public static function getProperties(): array
     {
         return [
-            'currency' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
-            'customerName' => [true, self::PROPERTY_TYPE_STRING, null, false, false],
-            'description' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
-            'email' => [true, self::PROPERTY_TYPE_STRING, null, false, false],
+            'currency' => [true, self::PROPERTY_TYPE_STRING, null, false, false],
+            'customerName' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
+            'description' => [true, self::PROPERTY_TYPE_STRING, null, false, false],
+            'email' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
             'expiryDate' => [false, self::PROPERTY_TYPE_DATE, DateTimeInterface::class, false, false],
-            'orderDate' => [false, self::PROPERTY_TYPE_DATE, DateTimeInterface::class, false, false],
             'id' => [false, self::PROPERTY_TYPE_OBJECT, OID::class, false, false],
+            'items' => [false, self::PROPERTY_TYPE_OBJECT, LineItem::class, true, false],
             'langKey' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
-            'merchantReference' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
+            'merchantReference' => [true, self::PROPERTY_TYPE_STRING, null, false, false],
             'optRefOne' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
             'optRefTwo' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
+            'orderDate' => [false, self::PROPERTY_TYPE_DATE, DateTimeInterface::class, false, false],
+            'phoneNumber' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
             'receiptUrl' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
-            'totalAmount' => [false, self::PROPERTY_TYPE_FLOAT, null, false, false],
-            'items' => [true, self::PROPERTY_TYPE_OBJECT, LineItem::class, true, false],
+            'totalAmount' => [true, self::PROPERTY_TYPE_FLOAT, null, false, false],
             'merchantReferenceId' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
             'orderTransactionId' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
             'redirectUrl' => [false, self::PROPERTY_TYPE_STRING, null, false, false],

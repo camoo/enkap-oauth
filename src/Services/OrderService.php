@@ -13,10 +13,11 @@ class OrderService extends BaseService
     public function place(Order $order): ?Order
     {
         try {
+            $order->setClient($this->client);
             $collection = $order->save();
             /** @var Order $response */
             $response = $collection->getResult()->firstOrFail();
-        } catch (Throwable $e) {
+        } catch (Throwable $exception) {
             return null;
         }
         return $response;
@@ -54,7 +55,8 @@ class OrderService extends BaseService
     {
 
         try {
-            $response = $order->delete($this->authService);
+            $order->setClient($this->client);
+            $response = $order->delete();
 
         } catch (Throwable $e) {
             return null;

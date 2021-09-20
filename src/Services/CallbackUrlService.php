@@ -12,8 +12,9 @@ class CallbackUrlService extends BaseService
     public function set(CallbackUrl $callbackUrl): bool
     {
         try {
+            $callbackUrl->setClient($this->client);
             $callbackUrl->save();
-        } catch (Throwable $e) {
+        } catch (Throwable $exception) {
             return false;
         }
         return true;

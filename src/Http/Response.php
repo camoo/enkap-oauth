@@ -64,7 +64,7 @@ class Response
      */
     public function getJson(): array
     {
-        if ($this->getStatusCode() !== 200) {
+        if (!in_array($this->getStatusCode(), [200, 201])) {
             $message = $this->content !== '' ? $this->content : 'request failed!';
             return ['message' => $message];
         }

@@ -56,13 +56,10 @@ $dataData = [
         ]
     ]
 ];
-$order->fromStringArray($dataData);
 
 try {
-    $collection = $order->save($authService);
-    /** @var Order $response */
-    $response = $collection->firstOrFail();
-     
+    $order->fromStringArray($dataData);
+    $response = $orderService->place($order);
      // Save references into your Database
      $entity = $this->Payments->newEntity($dataData);
      $entity->set('oder_transaction_id', $response->getOrderTransactionId());
