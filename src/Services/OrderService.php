@@ -5,11 +5,14 @@ namespace Enkap\OAuth\Services;
 
 use Enkap\OAuth\Interfaces\ModelInterface;
 use Enkap\OAuth\Model\Order;
-use GuzzleHttp\Exception\GuzzleException;
 use Throwable;
 
 class OrderService extends BaseService
 {
+    /**
+     * @param Order|ModelInterface $order
+     * @return Order|null
+     */
     public function place(Order $order): ?Order
     {
         try {
@@ -24,31 +27,7 @@ class OrderService extends BaseService
     }
 
     /**
-     * @param string $transactionId
-     *
-     * @return ModelInterface|Order
-     * @throws GuzzleException
-     */
-    public function getByTransactionId(string $transactionId): ModelInterface
-    {
-        $response = $this->get(new Order(), ['txid' => $transactionId]);
-        return $response->getResult()->firstOrFail();
-    }
-
-    /**
-     * @param string $merchantReferenceId
-     *
-     * @return ModelInterface|Order
-     * @throws GuzzleException
-     */
-    public function getByOrderMerchantId(string $merchantReferenceId): ModelInterface
-    {
-        $response = $this->get(new Order(), ['orderMerchantId' => $merchantReferenceId]);
-        return $response->getResult()->firstOrFail();
-    }
-
-    /**
-     * @param Order $order
+     * @param Order|ModelInterface $order
      * @return bool|null
      */
     public function delete(Order $order): ?bool
@@ -63,5 +42,27 @@ class OrderService extends BaseService
         }
 
         return $response->getStatusCode() === self::HTTP_SUCCESS_CODE;
+    }
+
+    /**
+     * @param string $transactionId
+     *
+     * @return ModelInterface|Order
+     */
+    public function getByTransactionId(string $transactionId): ModelInterface
+    {
+        $response = $this->loadModel(Order::class)->find(['txid' => $transactionId]);
+        return $response->getResult()->firstOrFail();
+    }
+
+    /**
+     * @param string $merchantReferenceId
+     *
+     * @return ModelInterface|Order
+     */
+    public function getByOrderMerchantId(string $merchantReferenceId): ModelInterface
+    {
+        $response = $this->loadModel(Order::class)->find(['orderMerchantId' => $merchantReferenceId]);
+        return $response->getResult()->firstOrFail();
     }
 }

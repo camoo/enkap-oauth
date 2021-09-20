@@ -3,11 +3,10 @@ declare(strict_types=1);
 
 namespace Enkap\OAuth\Services;
 
+use Enkap\OAuth\Exception\EnkapException;
 use Enkap\OAuth\Http\Client;
 use Enkap\OAuth\Http\ClientFactory;
-use Enkap\OAuth\Http\ModelResponse;
 use Enkap\OAuth\Interfaces\ModelInterface;
-use GuzzleHttp\Exception\GuzzleException;
 
 class BaseService
 {
@@ -22,11 +21,14 @@ class BaseService
     }
 
     /**
-     * @throws GuzzleException
+     * @param string $modelName
+     * @return ModelInterface
      */
-    public function get(ModelInterface $model, array $data): ModelResponse
+    public function loadModel(string $modelName): ModelInterface
     {
-        return $this->client->get($model, $data);
+        if (!class_exists($modelName)) {
+            throw new EnkapException(sprintf('Model %s cannot be loaded', $modelName));
+        }
+        return new $modelName($this->client);
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Enkap\OAuth\Model\Asset;
 
@@ -21,8 +22,7 @@ class OID extends BaseModel
      */
     public static function getSupportedMethods(): array
     {
-        return [
-        ];
+        return [];
     }
 
     /**

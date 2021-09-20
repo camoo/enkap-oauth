@@ -27,6 +27,7 @@ use Enkap\OAuth\Model\Asset\OID;
  * @property string $merchant_reference_id
  * @property string $order_transaction_id
  * @property string $redirect_url
+ * @property Order $requested_order
  */
 class Order extends BaseModel
 {
@@ -82,6 +83,7 @@ class Order extends BaseModel
             'orderTransactionId' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
             'redirectUrl' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
             'paymentStatus' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
+            'order' => [false, self::PROPERTY_TYPE_OBJECT, Order::class, false, false],
         ];
     }
 
@@ -294,6 +296,17 @@ class Order extends BaseModel
     public function getResourceURI(): string
     {
         return $this->uri;
+    }
+
+    public function getRequestedOrder() :?Order
+    {
+        return $this->_data['order'];
+    }
+
+    public function setRequestedOrder(?Order $order)
+    {
+        $this->propertyUpdated('order', $order);
+        $this->_data['order'] = $order;
     }
 
     public function delete(): ModelResponse

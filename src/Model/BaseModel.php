@@ -16,7 +16,10 @@ use GuzzleHttp\Exception\GuzzleException;
 
 /**
  * Class Model.
- *
+ * @method bool isMethodSupported(string $method)
+ * @method bool has($offset)
+ * @method mixed get($offset)
+ * @method mixed set($offset, $value)
  */
 abstract class BaseModel implements ModelInterface
 {
@@ -74,6 +77,16 @@ abstract class BaseModel implements ModelInterface
      */
     protected $client;
 
+    public function __call($method, $params)
+    {
+        if (!method_exists(ModelAggregator::class, $method)) {
+            throw new EnkapException(sprintf('Method %s not found in %s', $method, get_class($this)));
+        }
+        $aggregator = new ModelAggregator($this);
+        return call_user_func_array(array($aggregator, $method), $params);
+    }
+
+
     public function __construct(?Client $client = null)
     {
         $this->_dirty = [];
@@ -84,7 +97,9 @@ abstract class BaseModel implements ModelInterface
 
     public function setClient(Client $client)
     {
-        $this->client = $client;
+        if (null === $this->client) {
+            $this->client = $client;
+        }
     }
 
     /**
@@ -471,53 +486,23 @@ abstract class BaseModel implements ModelInterface
     }
 
     /**
-     * If the object supports a specific HTTP method.
-     *
-     * @param string $method
-     *
-     * @return bool
-     */
-    public function isMethodSupported(string $method): bool
-    {
-        return in_array($method, static::getSupportedMethods(), true);
-    }
-
-    /**
-     * @param mixed $offset
-     *
-     * @return bool
-     */
-    public function has($offset): bool
-    {
-        return $this->__isset($offset);
-    }
-
-    /**
-     * @param mixed $offset
-     *
-     * @return mixed
-     */
-    public function get($offset)
-    {
-        return $this->__get($offset);
-    }
-
-    /**
-     * @param mixed $offset
-     * @param mixed $value
-     *
-     * @return mixed
-     */
-    public function set($offset, $value)
-    {
-        return $this->__set($offset, $value);
-    }
-
-    /**
      * @param mixed $offset
      */
     public function unset($offset)
     {
         unset($this->_data[$offset]);
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    public function find(array $where = []): ModelResponse
+    {
+        if ($this->client === null) {
+            throw new EnkapException(
+                '->get() is only available on objects that have an injected Http client context.'
+            );
+        }
+        return $this->client->get($this, $where);
     }
 }
