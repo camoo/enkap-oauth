@@ -28,9 +28,14 @@ class OAuthService
      * @var Cache
      */
     private $cache;
+    /**
+     * @var bool
+     */
+    private $sandbox;
 
-    public function __construct(string $consumerKey, string $consumerSecret)
+    public function __construct(string $consumerKey, string $consumerSecret, bool $sandbox = false)
     {
+        $this->sandbox = $sandbox;
         $this->consumerKey = $consumerKey;
         $this->consumerSecret = $consumerSecret;
         $cryptoSalt = $_ENV['CRYPTO_SALT'] ?? null;
@@ -80,6 +85,8 @@ class OAuthService
                 sprintf('%s:%s', $this->consumerKey, $this->consumerSecret)
             )
         ];
+        $client = $this->getClient();
+        $client->sandbox = $this->sandbox;
         $response = $this->getClient()->post('/token', ['grant_type' => 'client_credentials',], $header);
         if ($response->getStatusCode() !== 200) {
             return null;

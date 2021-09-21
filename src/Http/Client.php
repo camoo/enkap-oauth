@@ -25,12 +25,13 @@ class Client
     public const POST_REQUEST = 'POST';
     public const PUT_REQUEST = 'PUT';
     public const DELETE_REQUEST = 'DELETE';
-    private const ENKAP_API_URL = 'https://api.enkap.cm';
+    private const ENKAP_API_URL_LIVE = 'https://api.enkap.cm';
+    private const ENKAP_API_URL_SANDBOX = 'https://api.enkap.maviance.info';
     private const ENKAP_CLIENT_TIMEOUT = 30;
     private $returnType;
     private const USER_AGENT_STRING = 'Enkap/CamooClient/%s (+https://github.com/camoo/enkap-oauth)';
-    /** @var bool */
-    public const SANDBOX = true;
+    /** @var bool $sandbox */
+    public $sandbox = false;
 
     /**
      * @var array
@@ -128,7 +129,10 @@ class Client
         //VALIDATE HEADERS
         $hHeaders = $this->getHeaders();
         $sMethod = strtoupper($method);
-        $endPoint = self::ENKAP_API_URL . $url;
+
+        $mainUrl = $this->sandbox ? self::ENKAP_API_URL_SANDBOX : self::ENKAP_API_URL_LIVE;
+
+        $endPoint = $mainUrl . $url;
 
         $oValidator = new Validator(array_merge(['request' => $sMethod], $hHeaders));
 
@@ -213,13 +217,13 @@ class Client
         ModelInterface $model,
         array          $data = [],
         ?string        $uri = null,
-        array $headers = []
+        array          $headers = []
     ): ModelResponse
     {
-        $this->returnType = $this->returnType  ?? $model->getModelName();
+        $this->returnType = $this->returnType ?? $model->getModelName();
         $suffix = $uri ?? $model->getResourceURI();
-        if (!self::SANDBOX) {
-            $suffix = '/v1.2/' . $suffix;
+        if (!$this->sandbox) {
+            $suffix = '/v1.2' . $suffix;
         }
         $uri = sprintf('/purchase%s', $suffix);
         $header = [
@@ -239,7 +243,7 @@ class Client
             'Authorization' => sprintf('Bearer %s', $this->authService->getAccessToken()),
             'Content-Type' => 'application/json',
         ];
-        $this->returnType = $this->returnType  ?? $model->getModelName();
+        $this->returnType = $this->returnType ?? $model->getModelName();
 
         if ($delete === true) {
             $method = self::DELETE_REQUEST;
@@ -248,8 +252,8 @@ class Client
         }
 
         $suffix = $model->getResourceURI();
-        if (!self::SANDBOX) {
-            $suffix = '/v1.2/' . $suffix;
+        if (!$this->sandbox) {
+            $suffix = '/v1.2' . $suffix;
         }
         $uri = sprintf('/purchase%s', $suffix);
 
