@@ -15,9 +15,16 @@ class BaseService
     /** @var Client $client */
     protected $client;
 
-    public function __construct(string $consumerKey, string $consumerSecret, bool $sandbox = true)
-    {
-        $this->client = ClientFactory::create(new OAuthService($consumerKey, $consumerSecret, $sandbox));
+    public function __construct(
+        string $consumerKey,
+        string $consumerSecret,
+        array $clientOptions = [],
+        bool $sandbox = true
+    ) {
+        $this->client = ClientFactory::create(
+            new OAuthService($consumerKey, $consumerSecret, $clientOptions, $sandbox),
+            $clientOptions
+        );
         $this->client->sandbox = $sandbox;
     }
 

@@ -14,6 +14,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\RequestOptions;
 use Valitron\Validator;
 
 /**
@@ -49,11 +50,6 @@ class Client
     ];
 
     /**
-     * @var int
-     */
-    private $timeout;
-
-    /**
      * @var array
      */
     private $_headers = [];
@@ -61,19 +57,25 @@ class Client
      * @var OAuthService
      */
     private $authService;
+    private $clientOptions;
 
     /**
      * @param OAuthService $authService
      * @param string|null $returnType
-     * @param int|null $timeout
+     * @param array $clientOptions
      */
-    public function __construct(OAuthService $authService, ?string $returnType = null, ?int $timeout = null)
-    {
+    public function __construct(
+        OAuthService $authService,
+        array        $clientOptions = [],
+        ?string      $returnType = null
+    ) {
         $this->addUserAgentString($this->getAPIInfo());
         $this->addUserAgentString(Helper::getPhpVersion());
         $this->returnType = $returnType;
-        $this->timeout = $timeout ?? self::ENKAP_CLIENT_TIMEOUT;
         $this->authService = $authService;
+        $this->clientOptions = $clientOptions;
+        $default = [RequestOptions::TIMEOUT => self::ENKAP_CLIENT_TIMEOUT];
+        $this->clientOptions += $default;
     }
 
     /**
@@ -108,7 +110,7 @@ class Client
 
     /**
      * @param string $method
-     * @param string $url
+     * @param string $uri
      * @param array $data
      * @param array $headers
      * @param null $oClient
@@ -119,12 +121,11 @@ class Client
      */
     protected function performRequest(
         string $method,
-        string $url,
+        string $uri,
         array  $data = [],
         array  $headers = [],
-               $oClient = null
-    ): ModelResponse
-    {
+        $oClient = null
+    ): ModelResponse {
         $this->setHeader($headers);
         //VALIDATE HEADERS
         $hHeaders = $this->getHeaders();
@@ -132,7 +133,7 @@ class Client
 
         $mainUrl = $this->sandbox ? self::ENKAP_API_URL_SANDBOX : self::ENKAP_API_URL_LIVE;
 
-        $endPoint = $mainUrl . $url;
+        $endPoint = $mainUrl . $uri;
 
         $oValidator = new Validator(array_merge(['request' => $sMethod], $hHeaders));
 
@@ -143,18 +144,20 @@ class Client
         }
 
         try {
-            $client = null === $oClient ? new GuzzleClient(['timeout' => $this->timeout]) : $oClient;
+            $client = null === $oClient ? new GuzzleClient($this->clientOptions) : $oClient;
 
             if (array_key_exists('Content-Type', $hHeaders) && $hHeaders['Content-Type'] === 'application/json') {
                 $request = $this->getRequest($sMethod, $endPoint, $data, $hHeaders);
                 $oResponse = $client->send($request);
             } else {
+                $option = [
+                    'headers' => $hHeaders,
+                    $this->hRequestVerbs[$sMethod] => $data,
+                ];
                 $oResponse = $client->request(
                     $sMethod,
                     $endPoint,
-                    [$this->hRequestVerbs[$sMethod] => $data,
-                        'headers' => $hHeaders
-                    ]
+                    $option
                 );
             }
 
@@ -205,9 +208,9 @@ class Client
     /**
      * @throws GuzzleException
      */
-    public function post(string $url, array $data = [], array $headers = []): ModelResponse
+    public function post(string $uri, array $data = [], array $headers = []): ModelResponse
     {
-        return $this->performRequest(self::POST_REQUEST, $url, $data, $headers);
+        return $this->performRequest(self::POST_REQUEST, $uri, $data, $headers);
     }
 
     /**
@@ -218,8 +221,7 @@ class Client
         array          $data = [],
         ?string        $uri = null,
         array          $headers = []
-    ): ModelResponse
-    {
+    ): ModelResponse {
         $this->returnType = $this->returnType ?? $model->getModelName();
         $suffix = $uri ?? $model->getResourceURI();
         if (!$this->sandbox) {

@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace Enkap\OAuth\Model;
 
+use Enkap\OAuth\Exception\EnkapException;
 use Enkap\OAuth\Interfaces\ModelInterface;
+use Enkap\OAuth\Query\ModelQuery;
 
 class ModelAggregator
 {
@@ -55,5 +57,15 @@ class ModelAggregator
     public function isMethodSupported(string $method): bool
     {
         return in_array($method, $this->model::getSupportedMethods(), true);
+    }
+
+    public function find(): ModelQuery
+    {
+        if ($this->model->getClient() === null) {
+            throw new EnkapException(
+                '->get() is only available on objects that have an injected Http client context.'
+            );
+        }
+        return new ModelQuery($this->model);
     }
 }

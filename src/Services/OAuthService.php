@@ -32,20 +32,29 @@ class OAuthService
      * @var bool
      */
     private $sandbox;
+    /**
+     * @var array
+     */
+    private $clientOptions;
 
-    public function __construct(string $consumerKey, string $consumerSecret, bool $sandbox = false)
-    {
+    public function __construct(
+        string $consumerKey,
+        string $consumerSecret,
+        array  $clientOptions = [],
+        bool   $sandbox = false
+    ) {
         $this->sandbox = $sandbox;
         $this->consumerKey = $consumerKey;
         $this->consumerSecret = $consumerSecret;
         $cryptoSalt = $_ENV['CRYPTO_SALT'] ?? null;
         $cacheEncrypt = null !== $cryptoSalt;
         $this->cache = new Cache(CacheConfig::fromArray(['crypto_salt' => $cryptoSalt, 'encrypt' => $cacheEncrypt]));
+        $this->clientOptions = $clientOptions;
     }
 
     protected function getClient(): Client
     {
-        return call_user_func([ClientFactory::class, 'create'], $this, 'Token');
+        return call_user_func([ClientFactory::class, 'create'], $this, $this->clientOptions, 'Token');
     }
 
     public function getAccessToken(): string

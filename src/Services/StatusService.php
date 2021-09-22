@@ -17,7 +17,7 @@ class StatusService extends BaseService
     public function getByTransactionId(string $transactionId): Status
     {
         $status = $this->loadModel(Status::class);
-        $response = $status->find(['txid' => $transactionId]);
+        $response = $status->find()->where(['txid' => $transactionId])->execute();
         return $response->getResult()->firstOrFail();
     }
 
@@ -29,7 +29,7 @@ class StatusService extends BaseService
     public function getByOrderMerchantId(string $merchantReferenceId): Status
     {
         $status = $this->loadModel(Status::class);
-        $response = $status->find(['orderMerchantId' => $merchantReferenceId]);
+        $response = $status->find()->where(['orderMerchantId' => $merchantReferenceId])->execute();
         return $response->getResult()->firstOrFail();
     }
 }

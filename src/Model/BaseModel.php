@@ -11,6 +11,7 @@ use Enkap\OAuth\Http\Client;
 use Enkap\OAuth\Http\ModelResponse;
 use Enkap\OAuth\Interfaces\ModelInterface;
 use Enkap\OAuth\Lib\Helper;
+use Enkap\OAuth\Query\ModelQuery;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -20,6 +21,7 @@ use GuzzleHttp\Exception\GuzzleException;
  * @method bool has($offset)
  * @method mixed get($offset)
  * @method mixed set($offset, $value)
+ * @method ModelQuery find()
  */
 abstract class BaseModel implements ModelInterface
 {
@@ -493,16 +495,8 @@ abstract class BaseModel implements ModelInterface
         unset($this->_data[$offset]);
     }
 
-    /**
-     * @throws GuzzleException
-     */
-    public function find(array $where = []): ModelResponse
+    public function getClient() : ?Client
     {
-        if ($this->client === null) {
-            throw new EnkapException(
-                '->get() is only available on objects that have an injected Http client context.'
-            );
-        }
-        return $this->client->get($this, $where);
+        return $this->client;
     }
 }

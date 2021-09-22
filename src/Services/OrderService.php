@@ -32,11 +32,9 @@ class OrderService extends BaseService
      */
     public function delete(Order $order): ?bool
     {
-
         try {
             $order->setClient($this->client);
             $response = $order->delete();
-
         } catch (Throwable $e) {
             return null;
         }
@@ -51,7 +49,7 @@ class OrderService extends BaseService
      */
     public function getByTransactionId(string $transactionId): ModelInterface
     {
-        $response = $this->loadModel(Order::class)->find(['txid' => $transactionId]);
+        $response = $this->loadModel(Order::class)->find()->where(['txid' => $transactionId])->execute();
         return $response->getResult()->firstOrFail();
     }
 
@@ -62,7 +60,9 @@ class OrderService extends BaseService
      */
     public function getByOrderMerchantId(string $merchantReferenceId): ModelInterface
     {
-        $response = $this->loadModel(Order::class)->find(['orderMerchantId' => $merchantReferenceId]);
+        $response = $this->loadModel(Order::class)->find()
+            ->where(['orderMerchantId' => $merchantReferenceId])
+            ->execute();
         return $response->getResult()->firstOrFail();
     }
 }
