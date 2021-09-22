@@ -87,7 +87,7 @@ class OAuthService
         ];
         $client = $this->getClient();
         $client->sandbox = $this->sandbox;
-        $response = $this->getClient()->post('/token', ['grant_type' => 'client_credentials',], $header);
+        $response = $client->post('/token', ['grant_type' => 'client_credentials',], $header);
         if ($response->getStatusCode() !== 200) {
             return null;
         }
