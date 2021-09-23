@@ -18,15 +18,15 @@ use Enkap\OAuth\Exception\EnkapException;
  */
 final class Helper
 {
-    private const ENKAP_CLIENT_VERSION = 1.0;
-    private const PACKAGE_NAME         = 'camoo/enkap-oauth';
+    private const ENKAP_CLIENT_VERSION = '1.0.3';
+    private const PACKAGE_NAME = 'camoo/enkap-oauth';
 
     public static function sataniser($str, $keep_newlines = false)
     {
         if (is_object($str) || is_array($str)) {
             return '';
         }
-        $filtered = (string) $str;
+        $filtered = (string)$str;
         if (!mb_check_encoding($filtered, 'UTF-8')) {
             return '';
         }
@@ -41,14 +41,14 @@ final class Helper
             $filtered = self::stripAllTags($filtered);
             $filtered = str_replace("<\n", "&lt;\n", $filtered);
         }
-        if (! $keep_newlines) {
+        if (!$keep_newlines) {
             $filtered = preg_replace('/[\r\n\t ]+/', ' ', $filtered);
         }
         $filtered = trim($filtered);
         $found = false;
         while (preg_match('/%[a-f0-9]{2}/i', $filtered, $match)) {
             $filtered = str_replace($match[0], '', $filtered);
-            $found    = true;
+            $found = true;
         }
         if ($found) {
             $filtered = trim(preg_replace('/ +/', ' ', $filtered));
@@ -56,7 +56,7 @@ final class Helper
         return $filtered;
     }
 
-    private static function stripAllTags($string) : string
+    private static function stripAllTags($string): string
     {
         $string = preg_replace('@<(script|style)[^>]*?>.*?</\\1>@si', '', $string);
         $string = strip_tags($string);
@@ -91,7 +91,7 @@ final class Helper
      *
      * @return void
      */
-    public static function redirect(string $destination, bool $permanent) : void
+    public static function redirect(string $destination, bool $permanent): void
     {
         if (mb_strpos($destination, '://') === false) {
             if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
@@ -102,14 +102,14 @@ final class Helper
             $destination = $protocol . '://' . $_SERVER['HTTP_HOST'] . $destination;
         }
         if ($permanent) {
-            $code    = 301;
+            $code = 301;
             $message = $code . ' Moved Permanently';
         } else {
-            $code    = 302;
+            $code = 302;
             $message = $code . ' Found';
         }
-        header('HTTP/'.$_SERVER['SERVER_PROTOCOL'].' ' . $message, true, $code);
-        header('Status: '  . $message, true, $code);
+        header('HTTP/' . $_SERVER['SERVER_PROTOCOL'] . ' ' . $message, true, $code);
+        header('Status: ' . $message, true, $code);
         header('Location: ' . $destination);
     }
 
@@ -118,7 +118,7 @@ final class Helper
      *
      * @return void
      */
-    public static function exitOrDie() : void
+    public static function exitOrDie(): void
     {
         exit(0);
     }
@@ -126,7 +126,7 @@ final class Helper
     /**
      * @throws EnvironmentIsBrokenException
      */
-    public static function createEnvFile() : void
+    public static function createEnvFile(): void
     {
         $key = Key::createNewRandomKey();
         $salt = $key->saveToAsciiSafeString();
@@ -144,7 +144,7 @@ final class Helper
     /**
      * @return string
      */
-    public static function getPhpVersion() : string
+    public static function getPhpVersion(): string
     {
         if (!defined('PHP_VERSION_ID')) {
             $version = explode('.', PHP_VERSION);
@@ -170,11 +170,12 @@ final class Helper
      * @return array|string if no glue provided, it won't be imploded
      */
     public static function flattenAssocArray(
-        array $array,
-        string $format,
+        array   $array,
+        string  $format,
         ?string $glue = null,
-        bool $escape = true
-    ) {
+        bool    $escape = true
+    )
+    {
         $pairs = [];
         foreach ($array as $key => $val) {
             if ($escape) {

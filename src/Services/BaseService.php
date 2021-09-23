@@ -7,6 +7,7 @@ use Enkap\OAuth\Exception\EnkapException;
 use Enkap\OAuth\Http\Client;
 use Enkap\OAuth\Http\ClientFactory;
 use Enkap\OAuth\Interfaces\ModelInterface;
+use Enkap\OAuth\Model\BaseModel;
 
 class BaseService
 {
@@ -30,7 +31,7 @@ class BaseService
 
     /**
      * @param string $modelName
-     * @return ModelInterface
+     * @return ModelInterface|BaseModel
      */
     public function loadModel(string $modelName): ModelInterface
     {

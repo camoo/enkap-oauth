@@ -70,6 +70,6 @@ class Json
             throw new Exception(sprintf('Content of file %s cannot be read', $fileName));
         }
 
-        return $this->decode($sData, true);
+        return $this->decode($sData);
     }
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9b39a399bf11ccc8c2abbc8a9f8dc6b8",
+    "content-hash": "af8372e74779fc9947dd42363e60195e",
     "packages": [
         {
             "name": "camoo/cache",

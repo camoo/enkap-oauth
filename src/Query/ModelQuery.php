@@ -23,7 +23,7 @@ class ModelQuery
         $this->model = $model;
     }
 
-    public function where(array $where): ModelQuery
+    public function where(array $where): self
     {
         $this->whereData = $where;
         return $this;

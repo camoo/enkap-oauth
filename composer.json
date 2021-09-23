@@ -31,10 +31,10 @@
   },
   "require": {
     "php": ">=7.3",
+    "ext-json": "*",
     "guzzlehttp/guzzle": "^7.3",
     "vlucas/phpdotenv": "^5.3",
     "vlucas/valitron": "^1.4",
-    "ext-json": "*",
     "camoo/cache": "^1.0"
   },
   "require-dev": {

@@ -29,6 +29,7 @@ class Client
     private const ENKAP_API_URL_LIVE = 'https://api.enkap.cm';
     private const ENKAP_API_URL_SANDBOX = 'https://api.enkap.maviance.info';
     private const ENKAP_CLIENT_TIMEOUT = 30;
+    /** @var string|null $returnType */
     private $returnType;
     private const USER_AGENT_STRING = 'Enkap/CamooClient/%s (+https://github.com/camoo/enkap-oauth)';
     /** @var bool $sandbox */
@@ -43,8 +44,8 @@ class Client
      * @var array
      */
     protected $hRequestVerbs = [
-        self::GET_REQUEST => 'query',
-        self::POST_REQUEST => 'form_params',
+        self::GET_REQUEST => RequestOptions::QUERY,
+        self::POST_REQUEST => RequestOptions::FORM_PARAMS,
         self::PUT_REQUEST => null,
         self::DELETE_REQUEST => null,
     ];
@@ -57,6 +58,8 @@ class Client
      * @var OAuthService
      */
     private $authService;
+
+    /** @var array|string[] $clientOptions */
     private $clientOptions;
 
     /**
@@ -68,14 +71,13 @@ class Client
         OAuthService $authService,
         array        $clientOptions = [],
         ?string      $returnType = null
-    ) {
+    )
+    {
         $this->addUserAgentString($this->getAPIInfo());
         $this->addUserAgentString(Helper::getPhpVersion());
         $this->returnType = $returnType;
         $this->authService = $authService;
         $this->clientOptions = $clientOptions;
-        $default = [RequestOptions::TIMEOUT => self::ENKAP_CLIENT_TIMEOUT];
-        $this->clientOptions += $default;
     }
 
     /**
@@ -124,8 +126,9 @@ class Client
         string $uri,
         array  $data = [],
         array  $headers = [],
-        $oClient = null
-    ): ModelResponse {
+               $oClient = null
+    ): ModelResponse
+    {
         $this->setHeader($headers);
         //VALIDATE HEADERS
         $hHeaders = $this->getHeaders();
@@ -144,25 +147,29 @@ class Client
         }
 
         try {
-            $client = null === $oClient ? new GuzzleClient($this->clientOptions) : $oClient;
+            $client = null === $oClient ? new GuzzleClient() : $oClient;
 
-            if (array_key_exists('Content-Type', $hHeaders) && $hHeaders['Content-Type'] === 'application/json') {
-                $request = $this->getRequest($sMethod, $endPoint, $data, $hHeaders);
-                $oResponse = $client->send($request);
-            } else {
-                $option = [
-                    'headers' => $hHeaders,
-                    $this->hRequestVerbs[$sMethod] => $data,
-                ];
-                $oResponse = $client->request(
-                    $sMethod,
-                    $endPoint,
-                    $option
-                );
+            $defaultOption = [
+                RequestOptions::TIMEOUT => self::ENKAP_CLIENT_TIMEOUT,
+                RequestOptions::HEADERS => $hHeaders,
+                RequestOptions::VERIFY => !$this->sandbox,
+            ];
+
+            if ($this->returnType === 'Token' || $sMethod === self::GET_REQUEST) {
+                $defaultOption[$this->hRequestVerbs[$sMethod]] = $data;
+                $data = [];
             }
 
+            $this->clientOptions += $defaultOption;
+
+            $request = $this->getRequest($sMethod, $endPoint, $data, $hHeaders);
+            $oResponse = $client->send($request, $this->clientOptions);
+
             if (!in_array($oResponse->getStatusCode(), [200, 201])) {
-                throw new EnkapBadResponseException((string)$oResponse->getBody());
+                throw new EnkapBadResponseException(
+                    (string)$oResponse->getBody(),
+                    $oResponse->getStatusCode()
+                );
             }
 
             $response = new Response(
@@ -221,7 +228,8 @@ class Client
         array          $data = [],
         ?string        $uri = null,
         array          $headers = []
-    ): ModelResponse {
+    ): ModelResponse
+    {
         $this->returnType = $this->returnType ?? $model->getModelName();
         $suffix = $uri ?? $model->getResourceURI();
         if (!$this->sandbox) {
