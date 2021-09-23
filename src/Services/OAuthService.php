@@ -10,7 +10,6 @@ use Enkap\OAuth\Http\Client;
 use Enkap\OAuth\Http\ClientFactory;
 use Enkap\OAuth\Interfaces\ModelInterface;
 use Enkap\OAuth\Model\Token;
-use GuzzleHttp\Exception\GuzzleException;
 use Throwable;
 
 class OAuthService
@@ -85,7 +84,6 @@ class OAuthService
 
     /**
      * @return ModelInterface|null|Token
-     * @throws GuzzleException
      */
     protected function apiCall(): ?ModelInterface
     {

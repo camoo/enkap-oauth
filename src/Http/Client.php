@@ -10,11 +10,10 @@ use Enkap\OAuth\Interfaces\ModelInterface;
 use Enkap\OAuth\Lib\Helper;
 use Enkap\OAuth\Services\OAuthService;
 use Enkap\OAuth\Model\ModelCollection;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
+use Throwable;
 use Valitron\Validator;
 
 /**
@@ -119,7 +118,7 @@ class Client
      *
      *
      * @return ModelResponse
-     * @throws GuzzleException
+     * @throws EnkapHttpClientException
      */
     protected function performRequest(
         string $method,
@@ -184,7 +183,7 @@ class Client
                 $response->getStatusCode(),
                 $response->getHeaders()
             );
-        } catch (RequestException $exception) {
+        } catch (Throwable $exception) {
             throw new EnkapHttpClientException(
                 $exception->getMessage(),
                 $exception->getCode(),
@@ -212,17 +211,11 @@ class Client
         return sprintf(static::USER_AGENT_STRING, Helper::getPackageVersion());
     }
 
-    /**
-     * @throws GuzzleException
-     */
     public function post(string $uri, array $data = [], array $headers = []): ModelResponse
     {
         return $this->performRequest(self::POST_REQUEST, $uri, $data, $headers);
     }
 
-    /**
-     * @throws GuzzleException
-     */
     public function get(
         ModelInterface $model,
         array          $data = [],
@@ -243,9 +236,6 @@ class Client
         return $this->performRequest(self::GET_REQUEST, $uri, $data, $headers);
     }
 
-    /**
-     * @throws GuzzleException
-     */
     public function save(ModelInterface $model, bool $delete = false): ModelResponse
     {
         $model->validate();

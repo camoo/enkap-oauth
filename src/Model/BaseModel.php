@@ -13,7 +13,6 @@ use Enkap\OAuth\Interfaces\ModelInterface;
 use Enkap\OAuth\Lib\Helper;
 use Enkap\OAuth\Query\ModelQuery;
 use Exception;
-use GuzzleHttp\Exception\GuzzleException;
 
 /**
  * Class Model.
@@ -386,9 +385,6 @@ abstract class BaseModel implements ModelInterface
         }
     }
 
-    /**
-     * @throws GuzzleException
-     */
     public function save(): ModelResponse
     {
         if ($this->client === null) {
@@ -400,9 +396,6 @@ abstract class BaseModel implements ModelInterface
         return $this->client->save($this);
     }
 
-    /**
-     * @throws GuzzleException
-     */
     public function delete(): ModelResponse
     {
         if ($this->client === null) {

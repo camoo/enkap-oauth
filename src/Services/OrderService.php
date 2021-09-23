@@ -5,7 +5,6 @@ namespace Enkap\OAuth\Services;
 
 use Enkap\OAuth\Interfaces\ModelInterface;
 use Enkap\OAuth\Model\Order;
-use Throwable;
 
 class OrderService extends BaseService
 {
@@ -15,15 +14,10 @@ class OrderService extends BaseService
      */
     public function place(Order $order): ?Order
     {
-        try {
-            $order->setClient($this->client);
-            $collection = $order->save();
-            /** @var Order $response */
-            $response = $collection->getResult()->firstOrFail();
-        } catch (Throwable $exception) {
-            return null;
-        }
-        return $response;
+        $order->setClient($this->client);
+        $collection = $order->save();
+
+        return $collection->getResult()->firstOrFail();
     }
 
     /**
@@ -32,12 +26,8 @@ class OrderService extends BaseService
      */
     public function delete(Order $order): ?bool
     {
-        try {
-            $order->setClient($this->client);
-            $response = $order->delete();
-        } catch (Throwable $e) {
-            return null;
-        }
+        $order->setClient($this->client);
+        $response = $order->delete();
 
         return $response->getStatusCode() === self::HTTP_SUCCESS_CODE;
     }
