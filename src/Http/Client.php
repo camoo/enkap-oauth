@@ -35,6 +35,20 @@ class Client
     public $sandbox = false;
 
     /**
+     * Debug switch (default set to false)
+     *
+     * @var bool
+     */
+    public $debug = false;
+
+    /**
+     * Debug file location (log to STDOUT by default)
+     *
+     * @var string
+     */
+    public $debugFile = 'php://output';
+
+    /**
      * @var array
      */
     protected $userAgent = [];
@@ -144,15 +158,20 @@ class Client
         if ($validateRequest === false) {
             throw new EnkapHttpClientException(json_encode($oValidator->errors()));
         }
+        $defaultOption = [
+            RequestOptions::TIMEOUT => self::ENKAP_CLIENT_TIMEOUT,
+            RequestOptions::HEADERS => $hHeaders,
+            RequestOptions::VERIFY => !$this->sandbox,
+        ];
 
+        if ($this->getDebug()) {
+            $defaultOption[RequestOptions::DEBUG] = fopen($this->debugFile, 'a');
+            if (!$defaultOption[RequestOptions::DEBUG]) {
+                throw new EnkapHttpClientException('Failed to open the debug file: ' . $this->debugFile);
+            }
+        }
         try {
             $client = null === $oClient ? new GuzzleClient() : $oClient;
-
-            $defaultOption = [
-                RequestOptions::TIMEOUT => self::ENKAP_CLIENT_TIMEOUT,
-                RequestOptions::HEADERS => $hHeaders,
-                RequestOptions::VERIFY => !$this->sandbox,
-            ];
 
             if ($this->returnType === 'Token' || $sMethod === self::GET_REQUEST) {
                 $defaultOption[$this->hRequestVerbs[$sMethod]] = $data;
@@ -282,5 +301,10 @@ class Client
             $headers,
             $httpBody
         );
+    }
+
+    private function getDebug(): bool
+    {
+        return $this->debug;
     }
 }

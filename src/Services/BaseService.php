@@ -20,13 +20,15 @@ class BaseService
         string $consumerKey,
         string $consumerSecret,
         array $clientOptions = [],
-        bool $sandbox = true
+        bool $sandbox = true,
+        bool $clientDebug = false
     ) {
         $this->client = ClientFactory::create(
             new OAuthService($consumerKey, $consumerSecret, $clientOptions, $sandbox),
             $clientOptions
         );
         $this->client->sandbox = $sandbox;
+        $this->client->debug = $clientDebug;
     }
 
     /**

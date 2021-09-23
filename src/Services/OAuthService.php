@@ -35,14 +35,20 @@ class OAuthService
      * @var array
      */
     private $clientOptions;
+    /**
+     * @var bool
+     */
+    private $clientDebug;
 
     public function __construct(
         string $consumerKey,
         string $consumerSecret,
         array  $clientOptions = [],
-        bool   $sandbox = false
+        bool   $sandbox = false,
+        bool $clientDebug = false
     ) {
         $this->sandbox = $sandbox;
+        $this->clientDebug = $clientDebug;
         $this->consumerKey = $consumerKey;
         $this->consumerSecret = $consumerSecret;
         $cryptoSalt = $_ENV['CRYPTO_SALT'] ?? null;
@@ -94,6 +100,7 @@ class OAuthService
         ];
         $client = $this->getClient();
         $client->sandbox = $this->sandbox;
+        $client->debug = $this->clientDebug;
         $response = $client->post('/token', ['grant_type' => 'client_credentials',], $header);
         if ($response->getStatusCode() !== 200) {
             return null;
