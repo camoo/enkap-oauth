@@ -73,28 +73,31 @@ try {
 }
 ```
 
-## Get Order
+## Get Payment Details
 
 ```php
-use Enkap\OAuth\Services\OrderService;
-use Enkap\OAuth\Model\Order;
+use Enkap\OAuth\Services\PaymentService;
+use Enkap\OAuth\Model\Payment;
 
 $consumerKey = 'hqBvUfOjdLoP04763L_LDO';
 $consumerSecret = 'FwxKTJzN4jE8IYdeCM83';
 
 $trxId = 'e07355446e0140ea9876a6ba38b155f3';
-$orderService = new OrderService($key, $secret);
-$orderModel = $orderService->getByTransactionId($trxId);
+$paymentService = new PaymentService($key, $secret);
+$payment = $paymentService->getByTransactionId($trxId);
 // status
-var_dump($orderModel->getPaymentStatus());
-
+var_dump($payment->getPaymentStatus());
+// order
+var_dump($payment->getOrder());
 # OR
 $internalTrxId = '61405dc1a38878.58742206';
-$orderService = new OrderService($key, $secret);
-$orderModel = $orderService->getByOrderMerchantId($internalTrxId);
+$paymentService = new PaymentService($key, $secret);
+$payment = $paymentService->getByOrderMerchantId($internalTrxId);
 
 // status
-var_dump($orderModel->getPaymentStatus());
+var_dump($payment->getPaymentStatus());
+// order
+var_dump($payment->getOrder());
 ```
 
 ## Check Payment Status

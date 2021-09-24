@@ -32,27 +32,4 @@ class OrderService extends BaseService
         return $response->getStatusCode() === self::HTTP_SUCCESS_CODE;
     }
 
-    /**
-     * @param string $transactionId
-     *
-     * @return ModelInterface|Order
-     */
-    public function getByTransactionId(string $transactionId): ModelInterface
-    {
-        $response = $this->loadModel(Order::class)->find()->where(['txid' => $transactionId])->execute();
-        return $response->getResult()->firstOrFail();
-    }
-
-    /**
-     * @param string $merchantReferenceId
-     *
-     * @return ModelInterface|Order
-     */
-    public function getByOrderMerchantId(string $merchantReferenceId): ModelInterface
-    {
-        $response = $this->loadModel(Order::class)->find()
-            ->where(['orderMerchantId' => $merchantReferenceId])
-            ->execute();
-        return $response->getResult()->firstOrFail();
-    }
 }
