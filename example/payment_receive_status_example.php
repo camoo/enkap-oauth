@@ -1,27 +1,24 @@
 <?php
+declare(strict_types=1);
+
 /**
- *
- * CAMOO SARL: http://www.camoo.cm
- * @copyright (c) camoo.cm
+ * Receive Payment status with Automatic notification Url
+ * CAMOO SARL: https://www.camoo.cm
+ * @copyright (Camoo SARL) camoo.cm
  * @license GPL-2.0-or-later
- * Copyright reserved
  * File: payment_receive_status_example.php
  * Created by: Camoo Sarl (e-commerce@camoo.sarl)
  * Description: ENKAP SDK
  *
  * @link http://www.camoo.cm
-*/
-
-/**
-* Receive Payment status with Automatic notification Url
-* @copyright 2021 CAMOO SARL.
-*/
-
-/**
- * IMPORTANT: It is required that you store Payment order data when submitting Payment as well as the unique id returned to the response of your Order submission.
  */
 
-//Receive DLR Data.
+/**
+ * IMPORTANT: It is required that you store Payment order data when submitting Payment as well as the unique id
+ *   returned to the response of your Order submission.
+ */
+
+//Receive STATUS Information.
 
 
 $status = $_REQUEST['status'];
@@ -37,7 +34,7 @@ if (empty($status)) {
 }
 
 /**
- * IMPORTANT: Cross-check data received from Automatic DLR Forwarding with the data you stored at SMS submission.
+ * IMPORTANT: Cross-check data received from Automatic Status Forwarding with the data you stored at Order submission.
  */
 /*Check Status data with Order data in your storage. If the unique id has no matching record in the storage
 discard Order data.
@@ -54,7 +51,8 @@ iii.    enkap_payments should have the following structure (PS: this definition 
 CREATE TABLE `enkap_payments`
 (
     id                    int unsigned  NOT NULL AUTO_INCREMENT,
-    currency              enum ('en', 'fr'),
+    currency              varchar(5)             default 'XAF',
+    country_code          varchar(3)             default 'CM',
     customer_name         varchar(200)           DEFAULT NULL,
     description           varchar(200)           DEFAULT NULL,
     email                 varchar(128)           DEFAULT NULL,
@@ -82,14 +80,15 @@ CREATE TABLE `enkap_payments`
 */
 
 /*Check if DLR data match with a message sent*/
-$stmt = $pdo->prepare('SELECT * FROM enkap_payments WHERE merchant_reference_id = ?');
-$stmt->execute(array($referenceId));
+/** @var PDO $pdo */
+$stmt = $pdo->prepare('SELECT * FROM `enkap_payments` WHERE `merchant_reference_id` = ?');
+$stmt->execute([$referenceId]);
 
-if ($stmt->rowCount()>0) {
+if ($stmt->rowCount() > 0) {
     /*If YES update the matching record with the DLR data*/
-    $row=$stmt->fetch();
-    $stmt=$pdo->prepare('UPDATE enkap_payments SET status = ?,status_date=now() WHERE id = ?');
-    if (!$stmt->execute(array($status,$row['id']))) {
+    $row = $stmt->fetch();
+    $stmt = $pdo->prepare('UPDATE `enkap_payments` SET `status` = ?, `status_date` = NOW() WHERE `id` = ?');
+    if (!$stmt->execute([$status, $row['id']])) {
         /*If update failed, return error*/
         header(BAD_REQUEST, true, 400);
     } else {

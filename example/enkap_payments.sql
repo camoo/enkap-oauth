@@ -1,7 +1,8 @@
 CREATE TABLE `enkap_payments`
 (
     id                    int unsigned  NOT NULL AUTO_INCREMENT,
-    currency              enum ('en', 'fr'),
+    currency              varchar(5)             default 'XAF',
+    country_code          varchar(3)             default 'CM',
     customer_name         varchar(200)           DEFAULT NULL,
     description           varchar(200)           DEFAULT NULL,
     email                 varchar(128)           DEFAULT NULL,
