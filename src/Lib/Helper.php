@@ -206,7 +206,7 @@ final class Helper
     /**
      * @return string
      */
-    public static function getPackageVersion()
+    public static function getPackageVersion(): string
     {
         if (!is_callable('\\Composer\\InstalledVersions::getPrettyVersion')) {
             return self::ENKAP_CLIENT_VERSION;
@@ -224,5 +224,18 @@ final class Helper
         }
 
         return $str;
+    }
+
+    public static function getOderMerchantIdFromUrl(): string
+    {
+        if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') {
+            $protocol = 'http';
+        } else {
+            $protocol = 'https';
+        }
+        $url = $protocol . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        $urlPath = parse_url($url, PHP_URL_PATH);
+        $urlExploded = explode('/', $urlPath);
+        return array_pop($urlExploded);
     }
 }
