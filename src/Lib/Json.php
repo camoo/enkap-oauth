@@ -14,7 +14,7 @@ class Json
     /** @var string $json */
     private $json;
 
-    public function __construct(?string $json=null, ?string $file=null)
+    public function __construct(?string $json = null, ?string $file = null)
     {
         $this->file = $file;
         $this->json = $json;
@@ -27,7 +27,7 @@ class Json
      *
      * @return array|object
      */
-    public function decode(?string $sJSON=null, bool $bAsHash = true)
+    public function decode(?string $sJSON = null, bool $bAsHash = true)
     {
         $jsonData = $sJSON ?? $this->json;
 
@@ -40,7 +40,7 @@ class Json
         }
 
         if (($xData = json_decode($jsonData, $bAsHash)) !== null
-                && (json_last_error() === JSON_ERROR_NONE)) {
+            && (json_last_error() === JSON_ERROR_NONE)) {
             return $xData;
         }
 
@@ -52,15 +52,15 @@ class Json
      *
      * @param null|string $sFile
      *
+     * @return array
      * @throws Exception
      *
-     * @return array
      */
-    public function read(?string $sFile=null) : array
+    public function read(?string $sFile = null): array
     {
         $fileName = $sFile ?? $this->file;
 
-        if (!is_file($fileName)) {
+        if (null === $fileName || !is_file($fileName)) {
             throw new Exception(sprintf('%s does not exist !', $fileName));
         }
 

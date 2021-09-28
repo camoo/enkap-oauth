@@ -158,6 +158,7 @@ class Client
         if ($validateRequest === false) {
             throw new EnkapHttpClientException(json_encode($oValidator->errors()));
         }
+
         $defaultOption = [
             RequestOptions::TIMEOUT => self::ENKAP_CLIENT_TIMEOUT,
             RequestOptions::HEADERS => $hHeaders,
@@ -230,16 +231,17 @@ class Client
         return sprintf(static::USER_AGENT_STRING, Helper::getPackageVersion());
     }
 
-    public function post(string $uri, array $data = [], array $headers = []): ModelResponse
+    public function post(string $uri, array $data = [], array $headers = [], $client = null): ModelResponse
     {
-        return $this->performRequest(self::POST_REQUEST, $uri, $data, $headers);
+        return $this->performRequest(self::POST_REQUEST, $uri, $data, $headers, $client);
     }
 
     public function get(
         ModelInterface $model,
         array          $data = [],
         ?string        $uri = null,
-        array          $headers = []
+        array          $headers = [],
+                       $client = null
     ): ModelResponse
     {
         $this->returnType = $this->returnType ?? $model->getModelName();
@@ -252,10 +254,10 @@ class Client
             'Authorization' => sprintf('Bearer %s', $this->authService->getAccessToken()),
         ];
         $headers += $header;
-        return $this->performRequest(self::GET_REQUEST, $uri, $data, $headers);
+        return $this->performRequest(self::GET_REQUEST, $uri, $data, $headers, $client);
     }
 
-    public function save(ModelInterface $model, bool $delete = false): ModelResponse
+    public function save(ModelInterface $model, bool $delete = false, $client = null): ModelResponse
     {
         $model->validate();
         $header = [
@@ -286,7 +288,8 @@ class Client
             $method,
             $uri,
             $data,
-            $header
+            $header,
+            $client
         );
         $model->setClean();
         return $modelResponse;

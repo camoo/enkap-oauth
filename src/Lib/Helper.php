@@ -10,6 +10,7 @@ use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException;
 use Defuse\Crypto\Key;
 use Enkap\OAuth\Exception\EnkapException;
+use Throwable;
 
 /**
  * Class Helper
@@ -211,8 +212,12 @@ final class Helper
         if (!is_callable('\\Composer\\InstalledVersions::getPrettyVersion')) {
             return self::ENKAP_CLIENT_VERSION;
         }
-
-        return InstalledVersions::getPrettyVersion(self::PACKAGE_NAME);
+        try {
+            $version = InstalledVersions::getPrettyVersion(self::PACKAGE_NAME);
+        } catch (Throwable $exception) {
+            $version = self::ENKAP_CLIENT_VERSION;
+        }
+        return $version;
     }
 
     public static function camelize(string $string, $capitalizeFirstCharacter = false)
