@@ -239,7 +239,7 @@ final class Helper
             $protocol = 'https';
         }
         $url = $protocol . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-        $urlPath = parse_url($url, PHP_URL_PATH);
+        $urlPath = rtrim(parse_url($url, PHP_URL_PATH), '/');
         $urlExploded = explode('/', $urlPath);
         return array_pop($urlExploded);
     }
