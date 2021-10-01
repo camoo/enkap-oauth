@@ -34,7 +34,7 @@ class Status extends BaseModel
         ];
     }
 
-    public function getAllowedStatus(): array
+    public static function getAllowedStatus(): array
     {
         return [
             self::CREATED_STATUS,
