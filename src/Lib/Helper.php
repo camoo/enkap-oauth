@@ -19,7 +19,7 @@ use Throwable;
  */
 final class Helper
 {
-    private const ENKAP_CLIENT_VERSION = '1.0.3';
+    private const ENKAP_CLIENT_VERSION = '1.0.4';
     private const PACKAGE_NAME = 'camoo/enkap-oauth';
 
     public static function sataniser($str, $keep_newlines = false)
@@ -241,6 +241,7 @@ final class Helper
         $url = $protocol . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         $urlPath = rtrim(parse_url($url, PHP_URL_PATH), '/');
         $urlExploded = explode('/', $urlPath);
-        return array_pop($urlExploded);
+        $referenceId = array_pop($urlExploded);
+        return self::sataniser($referenceId);
     }
 }

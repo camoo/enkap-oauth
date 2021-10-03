@@ -20,7 +20,7 @@ class BaseService
         string $consumerKey,
         string $consumerSecret,
         array $clientOptions = [],
-        bool $sandbox = true,
+        bool $sandbox = false,
         bool $clientDebug = false
     ) {
         $this->client = ClientFactory::create(

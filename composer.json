@@ -5,7 +5,7 @@
   "type": "camoo-plugin",
   "license": "GPL-2.0-or-later",
   "minimum-stability": "dev",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "prefer-stable": true,
   "authors": [
     {
