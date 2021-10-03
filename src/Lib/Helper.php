@@ -22,7 +22,7 @@ final class Helper
     private const ENKAP_CLIENT_VERSION = '1.0.4';
     private const PACKAGE_NAME = 'camoo/enkap-oauth';
 
-    public static function sataniser($str, $keep_newlines = false)
+    public static function satanise($str, $keep_newlines = false)
     {
         if (is_object($str) || is_array($str)) {
             return '';
@@ -242,6 +242,6 @@ final class Helper
         $urlPath = rtrim(parse_url($url, PHP_URL_PATH), '/');
         $urlExploded = explode('/', $urlPath);
         $referenceId = array_pop($urlExploded);
-        return self::sataniser($referenceId);
+        return self::satanise($referenceId);
     }
 }
