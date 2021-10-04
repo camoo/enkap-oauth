@@ -1,6 +1,6 @@
-# enkap-oauth
+# enkap-oauth Library
 
-E-commerce Plugins for SmobilPay
+SDK for e-nkap. SmobilPay e-commerce
 
 ## Installation
 
@@ -47,12 +47,14 @@ $dataData = [
             'particulars' => 'soya bien pimenté',
             'unitCost' => 100,
             'quantity' => 50,
+            'subTotal' => 5000
         ],
         [
             'itemId' => 2,
             'unitCost' => 700,
             'quantity' => 2,
             'particulars' => 'Bière 33 Export',
+            'subTotal' => 1400,
         ]
     ]
 ];
