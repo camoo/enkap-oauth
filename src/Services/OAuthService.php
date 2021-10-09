@@ -45,8 +45,9 @@ class OAuthService
         string $consumerSecret,
         array  $clientOptions = [],
         bool   $sandbox = false,
-        bool $clientDebug = false
-    ) {
+        bool   $clientDebug = false
+    )
+    {
         $this->sandbox = $sandbox;
         $this->clientDebug = $clientDebug;
         $this->consumerKey = $consumerKey;
@@ -64,7 +65,9 @@ class OAuthService
 
     public function getAccessToken(): string
     {
-        $accessToken = $this->cache->read('token');
+        $tokenCacheKeySuffix = $this->sandbox ? '_prod' : '_dev';
+        $tokenCacheKey = 'token' . $tokenCacheKeySuffix;
+        $accessToken = $this->cache->read($tokenCacheKey);
         if ($accessToken === false) {
             try {
                 $response = $this->apiCall();
@@ -83,7 +86,7 @@ class OAuthService
             }
             $accessToken = $response->getAccessToken();
             $expiresIn = $response->getExpiresIn();
-            $this->cache->write('token', $accessToken, $expiresIn);
+            $this->cache->write($tokenCacheKey, $accessToken, $expiresIn);
         }
         return $accessToken;
     }
@@ -95,8 +98,8 @@ class OAuthService
     {
         $header = [
             'Authorization' => 'Basic ' . base64_encode(
-                sprintf('%s:%s', $this->consumerKey, $this->consumerSecret)
-            )
+                    sprintf('%s:%s', $this->consumerKey, $this->consumerSecret)
+                )
         ];
         $client = $this->getClient();
         $client->sandbox = $this->sandbox;
