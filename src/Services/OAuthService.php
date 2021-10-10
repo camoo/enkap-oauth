@@ -65,7 +65,7 @@ class OAuthService
 
     public function getAccessToken(): string
     {
-        $tokenCacheKeySuffix = $this->sandbox ? '_prod' : '_dev';
+        $tokenCacheKeySuffix = $this->sandbox ? '_dev' : '_pro';
         $tokenCacheKey = 'token' . $tokenCacheKeySuffix;
         $accessToken = $this->cache->read($tokenCacheKey);
         if ($accessToken === false) {
