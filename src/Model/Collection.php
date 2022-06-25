@@ -6,9 +6,7 @@ use ArrayObject;
 
 class Collection extends ArrayObject
 {
-    /**
-     * @var BaseModel[]
-     */
+    /** @var BaseModel[] */
     protected $_associated_objects;
 
     public function addAssociatedObject($parent_property, BaseModel $object)
@@ -18,8 +16,6 @@ class Collection extends ArrayObject
 
     /**
      * Return whether the Collection is 0
-     *
-     * @return bool
      */
     public function empty(): bool
     {
@@ -46,8 +42,6 @@ class Collection extends ArrayObject
 
     /**
      * Remove a specific object from the collection.
-     *
-     * @param BaseModel $object
      */
     public function remove(BaseModel $object)
     {
@@ -58,9 +52,7 @@ class Collection extends ArrayObject
         }
     }
 
-    /**
-     *  Remove all the values' in the collection.
-     */
+    /** Remove all the values' in the collection. */
     public function removeAll()
     {
         foreach ($this->_associated_objects as $parent_property => $object) {

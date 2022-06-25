@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Enkap\OAuth\Lib;
@@ -7,7 +8,6 @@ use Enkap\OAuth\Exception\EnkapException as Exception;
 
 class Json
 {
-
     /** @var string $file */
     private $file;
 
@@ -22,15 +22,12 @@ class Json
 
     /**
      * decode json string
-     * @param string|null $sJSON
-     * @param bool $bAsHash
      *
      * @return array|object
      */
     public function decode(?string $sJSON = null, bool $bAsHash = true)
     {
         $jsonData = $sJSON ?? $this->json;
-
 
         if (null === $jsonData) {
             throw new Exception('Cannot decode on NULL');
@@ -50,11 +47,7 @@ class Json
     /**
      * Reads a json file
      *
-     * @param null|string $sFile
-     *
-     * @return array
      * @throws Exception
-     *
      */
     public function read(?string $sFile = null): array
     {

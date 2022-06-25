@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Enkap\OAuth\Model;
@@ -8,12 +9,16 @@ use Enkap\OAuth\Http\Client;
 class Status extends BaseModel
 {
     public const CREATED_STATUS = 'CREATED';
-    public const INITIALISED_STATUS = 'INITIALISED';
-    public const IN_PROGRESS_STATUS = 'IN_PROGRESS';
-    public const CONFIRMED_STATUS = 'CONFIRMED';
-    public const FAILED_STATUS = 'FAILED';
-    public const CANCELED_STATUS = 'CANCELED';
 
+    public const INITIALISED_STATUS = 'INITIALISED';
+
+    public const IN_PROGRESS_STATUS = 'IN_PROGRESS';
+
+    public const CONFIRMED_STATUS = 'CONFIRMED';
+
+    public const FAILED_STATUS = 'FAILED';
+
+    public const CANCELED_STATUS = 'CANCELED';
 
     private const MODEL_NAME = 'Status';
 
@@ -42,7 +47,7 @@ class Status extends BaseModel
             self::IN_PROGRESS_STATUS,
             self::CONFIRMED_STATUS,
             self::FAILED_STATUS,
-            self::CANCELED_STATUS
+            self::CANCELED_STATUS,
         ];
     }
 
@@ -84,7 +89,7 @@ class Status extends BaseModel
     public static function getSupportedMethods(): array
     {
         return [
-            Client::GET_REQUEST
+            Client::GET_REQUEST,
         ];
     }
 }

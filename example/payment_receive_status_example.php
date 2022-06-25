@@ -1,9 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 /**
  * Receive Payment status with Automatic notification Url
  * CAMOO SARL: https://www.camoo.cm
+ *
  * @copyright (Camoo SARL) camoo.cm
  * @license GPL-2.0-or-later
  * File: payment_receive_status_example.php
@@ -19,7 +21,6 @@ declare(strict_types=1);
  */
 
 //Receive STATUS Information.
-
 
 $status = $_REQUEST['status'];
 

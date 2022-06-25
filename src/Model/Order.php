@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Enkap\OAuth\Model;
@@ -10,27 +11,28 @@ use Enkap\OAuth\Model\Asset\LineItem;
 use Enkap\OAuth\Model\Asset\OID;
 
 /**
- * @property string $currency
- * @property string $customer_name
- * @property string $description
- * @property string $email
+ * @property string            $currency
+ * @property string            $customer_name
+ * @property string            $description
+ * @property string            $email
  * @property DateTimeInterface $expiry_date
  * @property DateTimeInterface $order_date
- * @property OID $id
- * @property string $lang_key
- * @property string $merchant_reference
- * @property string $opt_ref_one
- * @property string $opt_ref_two
- * @property string $receipt_url
- * @property float $total_amount
- * @property LineItem[] $items
- * @property string $merchant_reference_id
- * @property string $order_transaction_id
- * @property string $redirect_url
+ * @property OID               $id
+ * @property string            $lang_key
+ * @property string            $merchant_reference
+ * @property string            $opt_ref_one
+ * @property string            $opt_ref_two
+ * @property string            $receipt_url
+ * @property float             $total_amount
+ * @property LineItem[]        $items
+ * @property string            $merchant_reference_id
+ * @property string            $order_transaction_id
+ * @property string            $redirect_url
  */
 class Order extends BaseModel
 {
     private const MODEL_NAME = 'Order';
+
     private $uri = '/api/order';
 
     public function getModelName(): string
@@ -38,9 +40,7 @@ class Order extends BaseModel
         return self::MODEL_NAME;
     }
 
-    /**
-     * Get the supported methods.
-     */
+    /** Get the supported methods. */
     public static function getSupportedMethods(): array
     {
         return [
@@ -57,8 +57,6 @@ class Order extends BaseModel
      *  [2] - PHP type
      *  [3] - Is an Array
      *  [4] - Saves directly.
-     *
-     * @return array
      */
     public static function getProperties(): array
     {
@@ -248,14 +246,13 @@ class Order extends BaseModel
         return $this;
     }
 
-    /**
-     * @return LineItem[]|Collection
-     */
+    /** @return LineItem[]|Collection */
     public function getItems()
     {
         if (!isset($this->_data['items'])) {
             $this->_data['items'] = new Collection();
         }
+
         return $this->_data['items'];
     }
 
@@ -293,6 +290,7 @@ class Order extends BaseModel
     public function delete(): ModelResponse
     {
         $this->uri .= '/' . $this->getOrderTransactionId();
+
         return parent::delete();
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Enkap\OAuth\Model;
@@ -16,38 +17,37 @@ use Exception;
 
 /**
  * Class Model.
- * @method bool isMethodSupported(string $method)
- * @method bool has($offset)
- * @method mixed get($offset)
- * @method mixed set($offset, $value)
+ *
+ * @method bool       isMethodSupported(string $method)
+ * @method bool       has($offset)
+ * @method mixed      get($offset)
+ * @method mixed      set($offset, $value)
  * @method ModelQuery find()
  */
 abstract class BaseModel implements ModelInterface
 {
-    /**
-     * Keys for the meta properties array.
-     */
-    const KEY_MANDATORY = 0;
+    /** Keys for the meta properties array. */
+    public const KEY_MANDATORY = 0;
 
-    const KEY_TYPE = 1;
+    public const KEY_TYPE = 1;
 
-    const KEY_PHP_TYPE = 2;
+    public const KEY_PHP_TYPE = 2;
 
-    const KEY_IS_ARRAY = 3;
+    public const KEY_IS_ARRAY = 3;
 
-    const PROPERTY_TYPE_STRING = 'string';
+    public const PROPERTY_TYPE_STRING = 'string';
 
-    const PROPERTY_TYPE_INT = 'int';
+    public const PROPERTY_TYPE_INT = 'int';
 
-    const PROPERTY_TYPE_FLOAT = 'float';
+    public const PROPERTY_TYPE_FLOAT = 'float';
 
-    const PROPERTY_TYPE_BOOLEAN = 'bool';
+    public const PROPERTY_TYPE_BOOLEAN = 'bool';
 
-    const PROPERTY_TYPE_DATE = 'date';
+    public const PROPERTY_TYPE_DATE = 'date';
 
-    const PROPERTY_TYPE_TIMESTAMP = 'timestamp';
+    public const PROPERTY_TYPE_TIMESTAMP = 'timestamp';
 
-    const PROPERTY_TYPE_OBJECT = 'object';
+    public const PROPERTY_TYPE_OBJECT = 'object';
 
     /**
      * Container to the actual properties of the object.
@@ -78,22 +78,67 @@ abstract class BaseModel implements ModelInterface
      */
     protected $client;
 
-    public function __call($method, $params)
-    {
-        if (!method_exists(ModelAggregator::class, $method)) {
-            throw new EnkapException(sprintf('Method %s not found in %s', $method, get_class($this)));
-        }
-        $aggregator = new ModelAggregator($this);
-        return call_user_func_array(array($aggregator, $method), $params);
-    }
-
-
     public function __construct(?Client $client = null)
     {
         $this->_dirty = [];
         $this->_data = [];
         $this->_associated_objects = [];
         $this->client = $client;
+    }
+
+    public function __call($method, $params)
+    {
+        if (!method_exists(ModelAggregator::class, $method)) {
+            throw new EnkapException(sprintf('Method %s not found in %s', $method, get_class($this)));
+        }
+        $aggregator = new ModelAggregator($this);
+
+        return call_user_func_array([$aggregator, $method], $params);
+    }
+
+    /**
+     * Magic method for testing if properties exist.
+     *
+     * @param $property
+     *
+     * @return bool
+     */
+    public function __isset($property)
+    {
+        return isset($this->_data[$property]);
+    }
+
+    /**
+     * Magic getter for accessing properties directly.
+     *
+     * @param $property
+     */
+    public function __get($property)
+    {
+        $getter = sprintf('get%s', Helper::camelize($property, true));
+
+        if (method_exists($this, $getter)) {
+            return $this->$getter();
+        }
+
+        throw new EnkapException(sprintf("Undefined property %s::$%s.\n", __CLASS__, $property));
+    }
+
+    /**
+     * Magic setter for setting properties directly.
+     *
+     * @param $property
+     * @param $value
+     */
+    public function __set($property, $value)
+    {
+        $setter = sprintf('set%s', Helper::camelize($property));
+
+        if (method_exists($this, $setter)) {
+            return $this->$setter($value);
+        }
+
+        throw new EnkapException(sprintf("Undefined property %s::$%s.\n", __CLASS__, $property));
     }
 
     public function setClient(Client $client)
@@ -107,8 +152,6 @@ abstract class BaseModel implements ModelInterface
      * If there have been any properties changed since load.
      *
      * @param null $property
-     *
-     * @return bool
      */
     public function isDirty($property = null): bool
     {
@@ -156,7 +199,7 @@ abstract class BaseModel implements ModelInterface
      * $replace_data - replace existing data.
      *
      * @param $input_array
-     * @param bool $replace_data
+     *
      * @throws Exception
      */
     public function fromStringArray($input_array, bool $replace_data = false)
@@ -208,10 +251,6 @@ abstract class BaseModel implements ModelInterface
 
     /**
      * Convert the object into an array, and any non-primitives to string.
-     *
-     * @param mixed $dirty_only
-     *
-     * @return array
      */
     public function toStringArray($dirty_only = false): array
     {
@@ -244,11 +283,7 @@ abstract class BaseModel implements ModelInterface
     /**
      * Validate the object and (optionally) the child objects recursively.
      *
-     * @param bool $check_children
-     *
-     * @return bool
      * @throws Exception
-     *
      */
     public function validate(bool $check_children = true): bool
     {
@@ -292,8 +327,6 @@ abstract class BaseModel implements ModelInterface
      *
      * @param $type
      * @param $value
-     *
-     * @return mixed
      */
     public static function castToString($type, $value)
     {
@@ -304,19 +337,16 @@ abstract class BaseModel implements ModelInterface
         switch ($type) {
             case self::PROPERTY_TYPE_BOOLEAN:
                 return $value ? 'true' : 'false';
-
             case self::PROPERTY_TYPE_DATE:
                 /**
                  * @var DateTimeInterface
                  */
                 return $value->format('Y-m-d');
-
             case self::PROPERTY_TYPE_TIMESTAMP:
                 /**
                  * @var DateTimeInterface
                  */
                 return $value->format('c');
-
             case self::PROPERTY_TYPE_OBJECT:
                 if ($value instanceof self) {
                     return $value->toStringArray();
@@ -339,8 +369,9 @@ abstract class BaseModel implements ModelInterface
      * @param $value
      * @param $php_type
      *
-     * @return bool|DateTimeInterface|float|int|string
      * @throws Exception
+     *
+     * @return bool|DateTimeInterface|float|int|string
      */
     public static function castFromString($type, $value, $php_type)
     {
@@ -351,13 +382,10 @@ abstract class BaseModel implements ModelInterface
 
             case self::PROPERTY_TYPE_INT:
                 return (int)$value;
-
             case self::PROPERTY_TYPE_FLOAT:
                 return (float)$value;
-
             case self::PROPERTY_TYPE_BOOLEAN:
                 return in_array(strtolower($value), ['true', '1', 'yes'], true);
-
             case self::PROPERTY_TYPE_TIMESTAMP:
                 $timezone = new DateTimeZone('UTC');
 
@@ -368,14 +396,12 @@ abstract class BaseModel implements ModelInterface
                 }
 
                 return new DateTime($value, $timezone);
-
             case self::PROPERTY_TYPE_OBJECT:
                 /** @var self $instance */
                 $instance = new $php_type();
                 $instance->fromStringArray($value);
 
                 return $instance;
-
             default:
                 if (is_scalar($value)) {
                     return (string)$value;
@@ -403,11 +429,11 @@ abstract class BaseModel implements ModelInterface
                 '->delete() is only available on objects that have an injected Http client context.'
             );
         }
+
         return $this->client->save($this, true);
     }
 
     /**
-     * @param string $property
      * @param BaseModel $object
      */
     public function addAssociatedObject(string $property, self $object)
@@ -415,53 +441,15 @@ abstract class BaseModel implements ModelInterface
         $this->_associated_objects[$property] = $object;
     }
 
-    /**
-     * Magic method for testing if properties exist.
-     *
-     * @param $property
-     *
-     * @return bool
-     */
-    public function __isset($property)
+    /** @param mixed $offset */
+    public function unset($offset)
     {
-        return isset($this->_data[$property]);
+        unset($this->_data[$offset]);
     }
 
-    /**
-     * Magic getter for accessing properties directly.
-     *
-     * @param $property
-     *
-     * @return mixed
-     */
-    public function __get($property)
+    public function getClient(): ?Client
     {
-        $getter = sprintf('get%s', Helper::camelize($property, true));
-
-        if (method_exists($this, $getter)) {
-            return $this->$getter();
-        }
-
-        throw new EnkapException(sprintf("Undefined property %s::$%s.\n", __CLASS__, $property));
-    }
-
-    /**
-     * Magic setter for setting properties directly.
-     *
-     * @param $property
-     * @param $value
-     *
-     * @return mixed
-     */
-    public function __set($property, $value)
-    {
-        $setter = sprintf('set%s', Helper::camelize($property));
-
-        if (method_exists($this, $setter)) {
-            return $this->$setter($value);
-        }
-
-        throw new EnkapException(sprintf("Undefined property %s::$%s.\n", __CLASS__, $property));
+        return $this->client;
     }
 
     protected function propertyUpdated($property, $value)
@@ -478,18 +466,5 @@ abstract class BaseModel implements ModelInterface
                 }
             }
         }
-    }
-
-    /**
-     * @param mixed $offset
-     */
-    public function unset($offset)
-    {
-        unset($this->_data[$offset]);
-    }
-
-    public function getClient() : ?Client
-    {
-        return $this->client;
     }
 }

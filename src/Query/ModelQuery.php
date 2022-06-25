@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Enkap\OAuth\Query;
@@ -8,14 +9,10 @@ use Enkap\OAuth\Interfaces\ModelInterface;
 
 class ModelQuery
 {
-
-    /**
-     * @var ModelInterface
-     */
+    /** @var ModelInterface */
     private $model;
-    /**
-     * @var array
-     */
+
+    /** @var array */
     private $whereData;
 
     public function __construct(ModelInterface $model)
@@ -26,6 +23,7 @@ class ModelQuery
     public function where(array $where): self
     {
         $this->whereData = $where;
+
         return $this;
     }
 

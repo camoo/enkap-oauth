@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Enkap\OAuth\Services;
@@ -11,10 +12,8 @@ use Throwable;
 
 class CallbackUrlService extends BaseService
 {
-
     /**
      * @param CallbackUrl|ModelInterface $callbackUrl
-     * @return bool
      */
     public function set(CallbackUrl $callbackUrl): bool
     {
@@ -30,6 +29,7 @@ class CallbackUrlService extends BaseService
         } catch (Throwable $exception) {
             return false;
         }
+
         return true;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Enkap\OAuth\Services;
@@ -10,7 +11,6 @@ class OrderService extends BaseService
 {
     /**
      * @param Order|ModelInterface $order
-     * @return Order|null
      */
     public function place(Order $order): ?Order
     {
@@ -22,7 +22,6 @@ class OrderService extends BaseService
 
     /**
      * @param Order|ModelInterface $order
-     * @return bool|null
      */
     public function delete(Order $order): ?bool
     {
@@ -31,5 +30,4 @@ class OrderService extends BaseService
 
         return $response->getStatusCode() === self::HTTP_SUCCESS_CODE;
     }
-
 }

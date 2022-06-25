@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Enkap\OAuth\Model\Asset;
@@ -30,16 +31,13 @@ use Enkap\OAuth\Model\BaseModel;
  */
 
 /**
- *
  * @property float $sub_total
  */
 class LineItem extends BaseModel
 {
     private const MODEL_NAME = 'LineItem';
 
-    /**
-     * Get the supported methods.
-     */
+    /** Get the supported methods. */
     public static function getSupportedMethods(): array
     {
         return [
@@ -53,8 +51,6 @@ class LineItem extends BaseModel
      *  [2] - PHP type
      *  [3] - Is an Array
      *  [4] - Saves directly.
-     *
-     * @return array
      */
     public static function getProperties(): array
     {
@@ -67,19 +63,12 @@ class LineItem extends BaseModel
         ];
     }
 
-    /**
-     * @return string
-     */
+    /** @return string */
     public function getDescription(): string
     {
         return $this->_data['particulars'];
     }
 
-    /**
-     * @param string $value
-     *
-     * @return LineItem
-     */
     public function setDescription(string $value): LineItem
     {
         $this->propertyUpdated('particulars', $value);
@@ -88,19 +77,12 @@ class LineItem extends BaseModel
         return $this;
     }
 
-    /**
-     * @return string
-     */
+    /** @return string */
     public function getQuantity(): string
     {
         return $this->_data['quantity'];
     }
 
-    /**
-     * @param string $value
-     *
-     * @return LineItem
-     */
     public function setQuantity(string $value): LineItem
     {
         $this->propertyUpdated('quantity', $value);
@@ -109,19 +91,12 @@ class LineItem extends BaseModel
         return $this;
     }
 
-    /**
-     * @return float
-     */
+    /** @return float */
     public function getUnitCost(): float
     {
         return $this->_data['unitCost'];
     }
 
-    /**
-     * @param float $value
-     *
-     * @return LineItem
-     */
     public function setUnitCost(float $value): LineItem
     {
         $this->propertyUpdated('unitCost', $value);
@@ -130,19 +105,12 @@ class LineItem extends BaseModel
         return $this;
     }
 
-    /**
-     * @return string
-     */
+    /** @return string */
     public function getItemId(): string
     {
         return $this->_data['itemId'];
     }
 
-    /**
-     * @param string $value
-     *
-     * @return LineItem
-     */
     public function setItemId(string $value): LineItem
     {
         $this->propertyUpdated('itemId', $value);
@@ -151,19 +119,12 @@ class LineItem extends BaseModel
         return $this;
     }
 
-    /**
-     * @return float
-     */
+    /** @return float */
     public function getSubTotal(): float
     {
         return $this->_data['subTotal'];
     }
 
-    /**
-     * @param float $value
-     *
-     * @return LineItem
-     */
     public function setSubTotal(float $value): LineItem
     {
         $this->propertyUpdated('subTotal', $value);
