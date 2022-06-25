@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Enkap\OAuth\Services;
@@ -32,7 +33,6 @@ class BaseService
     }
 
     /**
-     * @param string $modelName
      * @return ModelInterface|BaseModel
      */
     public function loadModel(string $modelName): ModelInterface
@@ -40,6 +40,7 @@ class BaseService
         if (!class_exists($modelName)) {
             throw new EnkapException(sprintf('Model %s cannot be loaded', $modelName));
         }
+
         return new $modelName($this->client);
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Enkap\OAuth\Model;
@@ -30,6 +31,7 @@ class ModelCollection implements IteratorAggregate
     {
         if (empty($returnType)) {
             $this->values[] = $item;
+
             return;
         }
 
@@ -54,6 +56,7 @@ class ModelCollection implements IteratorAggregate
         if (empty($this->values)) {
             return null;
         }
+
         return $this->values[0];
     }
 
@@ -62,17 +65,17 @@ class ModelCollection implements IteratorAggregate
         if (!array_key_exists($position, $this->values)) {
             return null;
         }
+
         return $this->values[$position];
     }
 
-    /**
-     * @return ModelInterface
-     */
+    /** @return ModelInterface */
     public function firstOrFail(): ModelInterface
     {
         if (empty($this->values)) {
             throw new EnkapModelNotFoundException('Entity at position "0" Not found');
         }
+
         return $this->values[0];
     }
 
@@ -81,6 +84,7 @@ class ModelCollection implements IteratorAggregate
         if (!array_key_exists($position, $this->values)) {
             throw new EnkapModelNotFoundException(sprintf('Entity at position "%d" Not found', $position));
         }
+
         return $this->values[$position];
     }
 

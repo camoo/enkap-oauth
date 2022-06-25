@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Enkap\OAuth\Http;
@@ -7,17 +8,13 @@ use Enkap\OAuth\Model\ModelCollection;
 
 class ModelResponse
 {
-
-    /**
-     * @var ModelCollection
-     */
+    /** @var ModelCollection */
     private $collection;
 
     /** @var array $headers */
     private $headers;
-    /**
-     * @var int
-     */
+
+    /** @var int */
     private $code;
 
     public function __construct(ModelCollection $collection, int $code, array $headers)
@@ -41,5 +38,4 @@ class ModelResponse
     {
         return $this->collection;
     }
-
 }

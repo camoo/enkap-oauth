@@ -9,7 +9,6 @@ use stdClass;
 
 class JsonTest extends TestCase
 {
-
     private $json;
 
     protected function setUp(): void
@@ -44,7 +43,7 @@ class JsonTest extends TestCase
     public function testCanDecode()
     {
         $this->assertEquals([], $this->json->decode(''));
-        $this->assertInstanceOf(stdClass::class,$this->json->decode('{"test" : "ok"}', false));
+        $this->assertInstanceOf(stdClass::class, $this->json->decode('{"test" : "ok"}', false));
     }
 
     public function testReadWithNullThrowsException()

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Enkap\OAuth\Model;
@@ -8,19 +9,18 @@ use Enkap\OAuth\Http\Client;
 use Enkap\OAuth\Model\Asset\OID;
 
 /**
- * @property string $payment_status
- * @property string $payer_account_name
- * @property string $payer_account_number
- * @property string $payment_provider_id
- * @property string $payment_provider_name
- * @property OID $id
+ * @property string            $payment_status
+ * @property string            $payer_account_name
+ * @property string            $payer_account_number
+ * @property string            $payment_provider_id
+ * @property string            $payment_provider_name
+ * @property OID               $id
  * @property DateTimeInterface $payment_date
  * @property DateTimeInterface $order_date
- * @property Order $order
+ * @property Order             $order
  */
 class Payment extends BaseModel
 {
-
     private const MODEL_NAME = 'Payment';
 
     public function getModelName(): string

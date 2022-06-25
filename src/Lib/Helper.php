@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Enkap\OAuth\Lib;
@@ -20,6 +21,7 @@ use Throwable;
 final class Helper
 {
     private const ENKAP_CLIENT_VERSION = '1.0.4';
+
     private const PACKAGE_NAME = 'camoo/enkap-oauth';
 
     public static function satanise($str, $keep_newlines = false)
@@ -34,8 +36,9 @@ final class Helper
         if (strpos($filtered, '<') !== false) {
             $callback = function ($match) {
                 if (false === strpos($match[0], '>')) {
-                    return htmlentities($match[0], ENT_QUOTES | ENT_IGNORE, "UTF-8");
+                    return htmlentities($match[0], ENT_QUOTES | ENT_IGNORE, 'UTF-8');
                 }
+
                 return $match[0];
             };
             $filtered = preg_replace_callback('%<[^>]*?((?=<)|>|$)%', $callback, $filtered);
@@ -54,15 +57,8 @@ final class Helper
         if ($found) {
             $filtered = trim(preg_replace('/ +/', ' ', $filtered));
         }
+
         return $filtered;
-    }
-
-    private static function stripAllTags($string): string
-    {
-        $string = preg_replace('@<(script|style)[^>]*?>.*?</\\1>@si', '', $string);
-        $string = strip_tags($string);
-
-        return trim($string);
     }
 
     /**
@@ -72,6 +68,7 @@ final class Helper
     public static function encrypt(string $plaintext, bool $raw_binary = false): string
     {
         $key = Key::loadFromAsciiSafeString($_ENV['CRYPTO_SALT']);
+
         return Crypto::encrypt($plaintext, $key, $raw_binary);
     }
 
@@ -83,15 +80,11 @@ final class Helper
     public static function decrypt(string $ciphertext, bool $raw_binary = false): string
     {
         $key = Key::loadFromAsciiSafeString($_ENV['CRYPTO_SALT']);
+
         return Crypto::decrypt($ciphertext, $key, $raw_binary);
     }
 
-    /**
-     * @param string $destination URL to redirect to
-     * @param bool $permanent
-     *
-     * @return void
-     */
+    /** @param string $destination URL to redirect to */
     public static function redirect(string $destination, bool $permanent): void
     {
         if (mb_strpos($destination, '://') === false) {
@@ -114,19 +107,13 @@ final class Helper
         header('Location: ' . $destination);
     }
 
-    /**
-     * Exit function
-     *
-     * @return void
-     */
+    /** Exit function */
     public static function exitOrDie(): void
     {
         exit(0);
     }
 
-    /**
-     * @throws EnvironmentIsBrokenException
-     */
+    /** @throws EnvironmentIsBrokenException */
     public static function createEnvFile(): void
     {
         $key = Key::createNewRandomKey();
@@ -142,15 +129,14 @@ final class Helper
         }
     }
 
-    /**
-     * @return string
-     */
+    /** @return string */
     public static function getPhpVersion(): string
     {
         if (!defined('PHP_VERSION_ID')) {
             $version = explode('.', PHP_VERSION);
             define('PHP_VERSION_ID', $version[0] * 10000 + $version[1] * 100 + $version[2]);
         }
+
         return 'PHP/' . PHP_VERSION_ID;
     }
 
@@ -163,20 +149,14 @@ final class Helper
      * Generic function to flatten an associative array into an arbitrarily
      * delimited string.
      *
-     * @param array $array
-     * @param string $format
-     * @param string|null $glue
-     * @param bool $escape
-     *
      * @return array|string if no glue provided, it won't be imploded
      */
     public static function flattenAssocArray(
-        array   $array,
-        string  $format,
+        array $array,
+        string $format,
         ?string $glue = null,
-        bool    $escape = true
-    )
-    {
+        bool $escape = true
+    ) {
         $pairs = [];
         foreach ($array as $key => $val) {
             if ($escape) {
@@ -194,19 +174,12 @@ final class Helper
         return implode($glue, $pairs);
     }
 
-    /**
-     * @param $string
-     *
-     * @return string
-     */
-    public static function escape($string): string
+    public static function escape(string $string): string
     {
         return rawurlencode($string);
     }
 
-    /**
-     * @return string
-     */
+    /** @return string */
     public static function getPackageVersion(): string
     {
         if (!is_callable('\\Composer\\InstalledVersions::getPrettyVersion')) {
@@ -217,10 +190,11 @@ final class Helper
         } catch (Throwable $exception) {
             $version = self::ENKAP_CLIENT_VERSION;
         }
+
         return $version;
     }
 
-    public static function camelize(string $string, $capitalizeFirstCharacter = false)
+    public static function camelize(string $string, bool $capitalizeFirstCharacter = false)
     {
         $str = str_replace('_', '', ucwords($string, '_'));
 
@@ -242,6 +216,15 @@ final class Helper
         $urlPath = rtrim(parse_url($url, PHP_URL_PATH), '/');
         $urlExploded = explode('/', $urlPath);
         $referenceId = array_pop($urlExploded);
+
         return self::satanise($referenceId);
+    }
+
+    private static function stripAllTags(string $string): string
+    {
+        $string = preg_replace('@<(script|style)[^>]*?>.*?</\\1>@si', '', $string);
+        $string = strip_tags($string);
+
+        return trim($string);
     }
 }

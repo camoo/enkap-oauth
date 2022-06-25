@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Enkap\OAuth\Model;
@@ -18,9 +19,7 @@ class CallbackUrl extends BaseModel
         return self::MODEL_NAME;
     }
 
-    /**
-     * Get the supported methods.
-     */
+    /** Get the supported methods. */
     public static function getSupportedMethods(): array
     {
         return [
@@ -35,8 +34,6 @@ class CallbackUrl extends BaseModel
      *  [2] - PHP type
      *  [3] - Is an Array
      *  [4] - Saves directly.
-     *
-     * @return array
      */
     public static function getProperties(): array
     {
@@ -46,19 +43,12 @@ class CallbackUrl extends BaseModel
         ];
     }
 
-    /**
-     * @return string
-     */
+    /** @return string */
     public function getNotificationUrl(): string
     {
         return $this->_data['notificationUrl'];
     }
 
-    /**
-     * @param string $value
-     *
-     * @return self
-     */
     public function setNotificationUrl(string $value): self
     {
         $this->propertyUpdated('notificationUrl', $value);
@@ -67,19 +57,12 @@ class CallbackUrl extends BaseModel
         return $this;
     }
 
-    /**
-     * @return string
-     */
+    /** @return string */
     public function getReturnUrl(): string
     {
         return $this->_data['returnUrl'];
     }
 
-    /**
-     * @param string $value
-     *
-     * @return self
-     */
     public function setReturnUrl(string $value): self
     {
         $this->propertyUpdated('returnUrl', $value);
