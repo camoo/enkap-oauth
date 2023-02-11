@@ -20,7 +20,7 @@ use Throwable;
  */
 final class Helper
 {
-    private const ENKAP_CLIENT_VERSION = '1.0.4';
+    private const ENKAP_CLIENT_VERSION = '1.0.6';
 
     private const PACKAGE_NAME = 'camoo/enkap-oauth';
 

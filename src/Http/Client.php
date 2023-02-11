@@ -38,45 +38,33 @@ class Client
 
     private const USER_AGENT_STRING = 'Enkap/CamooClient/%s (+https://github.com/camoo/enkap-oauth)';
 
-    /** @var bool $sandbox */
-    public $sandbox = false;
+    private const API_VERSION = 'v1.2';
 
-    /**
-     * Debug switch (default set to false)
-     *
-     * @var bool
-     */
-    public $debug = false;
+    public bool $sandbox = false;
 
-    /**
-     * Debug file location (log to STDOUT by default)
-     *
-     * @var string
-     */
-    public $debugFile = 'php://output';
+    /** Debug switch (default set to false) */
+    public bool $debug = false;
 
-    /** @var array */
-    protected $userAgent = [];
+    /** Debug file location (log to STDOUT by default) */
+    public string $debugFile = 'php://output';
 
-    /** @var array */
-    protected $hRequestVerbs = [
+    protected array $userAgent = [];
+
+    protected array $hRequestVerbs = [
         self::GET_REQUEST => RequestOptions::QUERY,
         self::POST_REQUEST => RequestOptions::FORM_PARAMS,
         self::PUT_REQUEST => null,
         self::DELETE_REQUEST => null,
     ];
 
-    /** @var string|null $returnType */
-    private $returnType;
+    private ?string $returnType;
 
-    /** @var array */
-    private $_headers = [];
+    private array $_headers = [];
 
-    /** @var OAuthService */
-    private $authService;
+    private OAuthService $authService;
 
     /** @var array|string[] $clientOptions */
-    private $clientOptions;
+    private array $clientOptions;
 
     public function __construct(
         OAuthService $authService,
@@ -109,9 +97,9 @@ class Client
     ): ModelResponse {
         $this->returnType = $this->returnType ?? $model->getModelName();
         $suffix = $uri ?? $model->getResourceURI();
-        if (!$this->sandbox) {
-            $suffix = '/v1.2' . $suffix;
-        }
+
+        $suffix = DIRECTORY_SEPARATOR . self::API_VERSION . $suffix;
+
         $uri = sprintf('/purchase%s', $suffix);
         $header = [
             'Authorization' => sprintf('Bearer %s', $this->authService->getAccessToken()),
@@ -137,9 +125,8 @@ class Client
         }
 
         $suffix = $model->getResourceURI();
-        if (!$this->sandbox) {
-            $suffix = '/v1.2' . $suffix;
-        }
+        $suffix = DIRECTORY_SEPARATOR . self::API_VERSION . $suffix;
+
         $uri = sprintf('/purchase%s', $suffix);
 
         if (!$model->isMethodSupported($method)) {
