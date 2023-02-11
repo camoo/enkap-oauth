@@ -63,7 +63,6 @@ class LineItem extends BaseModel
         ];
     }
 
-    /** @return string */
     public function getDescription(): string
     {
         return $this->_data['particulars'];
@@ -77,7 +76,6 @@ class LineItem extends BaseModel
         return $this;
     }
 
-    /** @return string */
     public function getQuantity(): string
     {
         return $this->_data['quantity'];
@@ -91,7 +89,6 @@ class LineItem extends BaseModel
         return $this;
     }
 
-    /** @return float */
     public function getUnitCost(): float
     {
         return $this->_data['unitCost'];
@@ -105,7 +102,6 @@ class LineItem extends BaseModel
         return $this;
     }
 
-    /** @return string */
     public function getItemId(): string
     {
         return $this->_data['itemId'];
@@ -119,7 +115,6 @@ class LineItem extends BaseModel
         return $this;
     }
 
-    /** @return float */
     public function getSubTotal(): float
     {
         return $this->_data['subTotal'];

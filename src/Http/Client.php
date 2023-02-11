@@ -90,7 +90,6 @@ class Client
         $this->clientOptions = $clientOptions;
     }
 
-    /** @param string $userAgent */
     public function addUserAgentString(string $userAgent): void
     {
         $this->userAgent[] = $userAgent;
@@ -281,9 +280,7 @@ class Client
         );
     }
 
-    /**
-     * Validate request params
-     */
+    /** Validate request params */
     private function validatorDefault(Validator $oValidator): bool
     {
         $oValidator->rule('required', ['Authorization']);

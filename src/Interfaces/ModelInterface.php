@@ -6,9 +6,7 @@ namespace Enkap\OAuth\Interfaces;
 
 interface ModelInterface
 {
-    /**
-     * The original name of the model.
-     */
+    /** The original name of the model. */
     public function getModelName(): string;
 
     public function getResourceURI(): string;

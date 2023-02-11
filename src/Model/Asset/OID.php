@@ -41,15 +41,11 @@ class OID extends BaseModel
         ];
     }
 
-    /** @return string */
     public function getUuid(): string
     {
         return $this->_data['uuid'];
     }
 
-    /**
-     * @return OID
-     */
     public function setUuid(string $value): self
     {
         $this->propertyUpdated('uuid', $value);
@@ -58,15 +54,11 @@ class OID extends BaseModel
         return $this;
     }
 
-    /** @return string */
     public function getVersion(): string
     {
         return $this->_data['version'];
     }
 
-    /**
-     * @return OID
-     */
     public function setVersion(string $value): self
     {
         $this->propertyUpdated('version', $value);

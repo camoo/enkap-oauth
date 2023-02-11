@@ -33,13 +33,11 @@ class Response
         $this->headers = $headers;
     }
 
-    /** @return string */
     public function getBody(): string
     {
         return $this->content;
     }
 
-    /** @return int */
     public function getStatusCode(): int
     {
         return $this->statusCode;
@@ -50,7 +48,6 @@ class Response
         return $this->headers;
     }
 
-    /** @return array */
     public function getJson(): array
     {
         if (!in_array($this->getStatusCode(), [200, 201])) {

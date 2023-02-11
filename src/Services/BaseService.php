@@ -32,9 +32,7 @@ class BaseService
         $this->client->debug = $clientDebug;
     }
 
-    /**
-     * @return ModelInterface|BaseModel
-     */
+    /** @return ModelInterface|BaseModel */
     public function loadModel(string $modelName): ModelInterface
     {
         if (!class_exists($modelName)) {

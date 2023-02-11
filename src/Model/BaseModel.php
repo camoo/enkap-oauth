@@ -99,8 +99,6 @@ abstract class BaseModel implements ModelInterface
     /**
      * Magic method for testing if properties exist.
      *
-     * @param $property
-     *
      * @return bool
      */
     public function __isset($property)
@@ -110,8 +108,6 @@ abstract class BaseModel implements ModelInterface
 
     /**
      * Magic getter for accessing properties directly.
-     *
-     * @param $property
      */
     public function __get($property)
     {
@@ -126,9 +122,6 @@ abstract class BaseModel implements ModelInterface
 
     /**
      * Magic setter for setting properties directly.
-     *
-     * @param $property
-     * @param $value
      */
     public function __set($property, $value)
     {
@@ -164,10 +157,6 @@ abstract class BaseModel implements ModelInterface
 
     /**
      * Manually set a property as dirty.
-     *
-     * @param $property
-     *
-     * @return self
      */
     public function setDirty($property): BaseModel
     {
@@ -180,8 +169,6 @@ abstract class BaseModel implements ModelInterface
      * Manually set a property as clean.
      *
      * @param null $property
-     *
-     * @return self
      */
     public function setClean($property = null): BaseModel
     {
@@ -197,8 +184,6 @@ abstract class BaseModel implements ModelInterface
     /**
      * Load an assoc array into the instance of the object $property => $value
      * $replace_data - replace existing data.
-     *
-     * @param $input_array
      *
      * @throws Exception
      */
@@ -324,9 +309,6 @@ abstract class BaseModel implements ModelInterface
 
     /**
      * Convert properties to strings, based on the types parsed.
-     *
-     * @param $type
-     * @param $value
      */
     public static function castToString($type, $value)
     {
@@ -365,10 +347,6 @@ abstract class BaseModel implements ModelInterface
     /**
      * Cast the values to PHP types.
      *
-     * @param $type
-     * @param $value
-     * @param $php_type
-     *
      * @throws Exception
      *
      * @return bool|DateTimeInterface|float|int|string
@@ -379,7 +357,6 @@ abstract class BaseModel implements ModelInterface
         $timezone = null;
 
         switch ($type) {
-
             case self::PROPERTY_TYPE_INT:
                 return (int)$value;
             case self::PROPERTY_TYPE_FLOAT:
@@ -389,7 +366,7 @@ abstract class BaseModel implements ModelInterface
             case self::PROPERTY_TYPE_TIMESTAMP:
                 $timezone = new DateTimeZone('UTC');
 
-            // no break
+                // no break
             case self::PROPERTY_TYPE_DATE:
                 if (preg_match('/Date\\((?<timestamp>[0-9+.]+)\\)/', $value, $matches)) {
                     $value = $matches['timestamp'];
@@ -433,15 +410,11 @@ abstract class BaseModel implements ModelInterface
         return $this->client->save($this, true);
     }
 
-    /**
-     * @param BaseModel $object
-     */
     public function addAssociatedObject(string $property, self $object)
     {
         $this->_associated_objects[$property] = $object;
     }
 
-    /** @param mixed $offset */
     public function unset($offset)
     {
         unset($this->_data[$offset]);

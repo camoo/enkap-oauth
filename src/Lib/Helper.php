@@ -129,7 +129,6 @@ final class Helper
         }
     }
 
-    /** @return string */
     public static function getPhpVersion(): string
     {
         if (!defined('PHP_VERSION_ID')) {
@@ -179,7 +178,6 @@ final class Helper
         return rawurlencode($string);
     }
 
-    /** @return string */
     public static function getPackageVersion(): string
     {
         if (!is_callable('\\Composer\\InstalledVersions::getPrettyVersion')) {

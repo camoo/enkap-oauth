@@ -12,9 +12,7 @@ use Throwable;
 
 class CallbackUrlService extends BaseService
 {
-    /**
-     * @param CallbackUrl|ModelInterface $callbackUrl
-     */
+    /** @param CallbackUrl|ModelInterface $callbackUrl */
     public function set(CallbackUrl $callbackUrl): bool
     {
         try {
