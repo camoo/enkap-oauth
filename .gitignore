@@ -5,3 +5,4 @@ sample
 .php_cs.cache
 .phpunit.result.cache
 config/.env
+.php-cs-fixer.cache
