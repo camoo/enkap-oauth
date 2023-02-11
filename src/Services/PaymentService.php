@@ -9,9 +9,7 @@ use Enkap\OAuth\Model\Payment;
 
 class PaymentService extends BaseService
 {
-    /**
-     * @return ModelInterface|Payment
-     */
+    /** @return ModelInterface|Payment */
     public function getByTransactionId(string $transactionId): ModelInterface
     {
         $response = $this->loadModel(Payment::class)->find()->where(['txid' => $transactionId])->execute();
@@ -19,9 +17,7 @@ class PaymentService extends BaseService
         return $response->getResult()->firstOrFail();
     }
 
-    /**
-     * @return ModelInterface|Payment
-     */
+    /** @return ModelInterface|Payment */
     public function getByOrderMerchantId(string $merchantReferenceId): ModelInterface
     {
         $response = $this->loadModel(Payment::class)->find()

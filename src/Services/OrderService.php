@@ -9,9 +9,7 @@ use Enkap\OAuth\Model\Order;
 
 class OrderService extends BaseService
 {
-    /**
-     * @param Order|ModelInterface $order
-     */
+    /** @param Order|ModelInterface $order */
     public function place(Order $order): ?Order
     {
         $order->setClient($this->client);
@@ -20,9 +18,7 @@ class OrderService extends BaseService
         return $collection->getResult()->firstOrFail();
     }
 
-    /**
-     * @param Order|ModelInterface $order
-     */
+    /** @param Order|ModelInterface $order */
     public function delete(Order $order): ?bool
     {
         $order->setClient($this->client);

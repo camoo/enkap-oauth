@@ -32,9 +32,7 @@ class ModelAggregator
         return $this->model->__set($offset, $value);
     }
 
-    /**
-     * If the object supports a specific HTTP method.
-     */
+    /** If the object supports a specific HTTP method. */
     public function isMethodSupported(string $method): bool
     {
         return in_array($method, $this->model::getSupportedMethods(), true);

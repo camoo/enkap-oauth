@@ -9,9 +9,7 @@ use Enkap\OAuth\Model\Status;
 
 class StatusService extends BaseService
 {
-    /**
-     * @return Status|ModelInterface
-     */
+    /** @return Status|ModelInterface */
     public function getByTransactionId(string $transactionId): Status
     {
         $status = $this->loadModel(Status::class);
@@ -20,9 +18,7 @@ class StatusService extends BaseService
         return $response->getResult()->firstOrFail();
     }
 
-    /**
-     * @return Status|ModelInterface
-     */
+    /** @return Status|ModelInterface */
     public function getByOrderMerchantId(string $merchantReferenceId): Status
     {
         $status = $this->loadModel(Status::class);

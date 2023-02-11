@@ -43,7 +43,6 @@ class CallbackUrl extends BaseModel
         ];
     }
 
-    /** @return string */
     public function getNotificationUrl(): string
     {
         return $this->_data['notificationUrl'];
@@ -57,7 +56,6 @@ class CallbackUrl extends BaseModel
         return $this;
     }
 
-    /** @return string */
     public function getReturnUrl(): string
     {
         return $this->_data['returnUrl'];

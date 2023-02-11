@@ -14,9 +14,7 @@ class Collection extends ArrayObject
         $this->_associated_objects[$parent_property] = $object;
     }
 
-    /**
-     * Return whether the Collection is 0
-     */
+    /** Return whether the Collection is 0 */
     public function empty(): bool
     {
         return !count($this);
@@ -24,8 +22,6 @@ class Collection extends ArrayObject
 
     /**
      * Remove an item at a specific index.
-     *
-     * @param $index
      */
     public function removeAt($index)
     {
@@ -40,9 +36,7 @@ class Collection extends ArrayObject
         }
     }
 
-    /**
-     * Remove a specific object from the collection.
-     */
+    /** Remove a specific object from the collection. */
     public function remove(BaseModel $object)
     {
         foreach ($this as $index => $item) {

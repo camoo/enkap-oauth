@@ -69,7 +69,6 @@ class ModelCollection implements IteratorAggregate
         return $this->values[$position];
     }
 
-    /** @return ModelInterface */
     public function firstOrFail(): ModelInterface
     {
         if (empty($this->values)) {
