@@ -33,7 +33,7 @@ class Order extends BaseModel
 {
     private const MODEL_NAME = 'Order';
 
-    private $uri = '/api/order';
+    private string $uri = '/api/order';
 
     public function getModelName(): string
     {
@@ -247,7 +247,7 @@ class Order extends BaseModel
     }
 
     /** @return LineItem[]|Collection */
-    public function getItems()
+    public function getItems(): array|Collection
     {
         if (!isset($this->_data['items'])) {
             $this->_data['items'] = new Collection();

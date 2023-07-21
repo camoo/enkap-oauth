@@ -14,20 +14,15 @@ class BaseService
 {
     protected const HTTP_SUCCESS_CODE = 200;
 
-    /** @var Client $client */
-    protected $client;
+    protected Client $client;
 
     public function __construct(
         string $consumerKey,
         string $consumerSecret,
-        array $clientOptions = [],
         bool $sandbox = false,
         bool $clientDebug = false
     ) {
-        $this->client = ClientFactory::create(
-            new OAuthService($consumerKey, $consumerSecret, $clientOptions, $sandbox),
-            $clientOptions
-        );
+        $this->client = ClientFactory::create(new OAuthService($consumerKey, $consumerSecret, $sandbox));
         $this->client->sandbox = $sandbox;
         $this->client->debug = $clientDebug;
     }

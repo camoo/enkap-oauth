@@ -13,8 +13,8 @@ class ClientFactory
     {
     }
 
-    public static function create(OAuthService $authService, array $options = [], ?string $returnType = null): Client
+    public static function create(OAuthService $authService, ?string $returnType = null): Client
     {
-        return new Client($authService, $options, $returnType);
+        return new Client($authService, $returnType);
     }
 }
