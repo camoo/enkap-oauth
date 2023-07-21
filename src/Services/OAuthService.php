@@ -15,39 +15,17 @@ use Throwable;
 
 class OAuthService
 {
-    /** @var string */
-    private $consumerKey;
-
-    /** @var string */
-    private $consumerSecret;
-
-    /** @var Cache */
-    private $cache;
-
-    /** @var bool */
-    private $sandbox;
-
-    /** @var array */
-    private $clientOptions;
-
-    /** @var bool */
-    private $clientDebug;
+    private Cache $cache;
 
     public function __construct(
-        string $consumerKey,
-        string $consumerSecret,
-        array $clientOptions = [],
-        bool $sandbox = false,
-        bool $clientDebug = false
+        private readonly string $consumerKey,
+        private readonly string $consumerSecret,
+        private readonly bool $sandbox = false,
+        private readonly bool $clientDebug = false
     ) {
-        $this->sandbox = $sandbox;
-        $this->clientDebug = $clientDebug;
-        $this->consumerKey = $consumerKey;
-        $this->consumerSecret = $consumerSecret;
         $cryptoSalt = $_ENV['CRYPTO_SALT'] ?? null;
         $cacheEncrypt = null !== $cryptoSalt;
         $this->cache = new Cache(CacheConfig::fromArray(['crypto_salt' => $cryptoSalt, 'encrypt' => $cacheEncrypt]));
-        $this->clientOptions = $clientOptions;
     }
 
     public function getAccessToken(): string
@@ -55,37 +33,35 @@ class OAuthService
         $tokenCacheKeySuffix = $this->sandbox ? '_dev' : '_pro';
         $tokenCacheKey = 'token' . $tokenCacheKeySuffix;
         $accessToken = $this->cache->read($tokenCacheKey);
-        if ($accessToken === false) {
-            try {
-                $response = $this->apiCall();
-            } catch (Throwable $exception) {
-                throw new EnKapAccessTokenException(
-                    $exception->getMessage(),
-                    $exception->getCode(),
-                    $exception->getPrevious()
-                );
-            }
-
-            if ($response === null) {
-                throw new EnKapAccessTokenException(
-                    'Access Token cannot be retrieved. Please check your credentials'
-                );
-            }
-            $accessToken = $response->getAccessToken();
-            $expiresIn = $response->getExpiresIn();
-            $this->cache->write($tokenCacheKey, $accessToken, $expiresIn);
+        if (!empty($accessToken)) {
+            return $accessToken;
         }
+
+        try {
+            $response = $this->apiCall();
+        } catch (Throwable $ex) {
+            throw new EnKapAccessTokenException($ex->getMessage(), $ex->getCode(), $ex->getPrevious());
+        }
+
+        if ($response === null) {
+            throw new EnKapAccessTokenException(
+                'Access Token cannot be retrieved. Please check your credentials'
+            );
+        }
+        $accessToken = $response->getAccessToken();
+        $expiresIn = $response->getExpiresIn();
+        $this->cache->write($tokenCacheKey, $accessToken, $expiresIn);
 
         return $accessToken;
     }
 
-    protected function getClient(): Client
+    private function getClient(): Client
     {
-        return call_user_func([ClientFactory::class, 'create'], $this, $this->clientOptions, 'Token');
+        return ClientFactory::create($this, 'Token');
     }
 
     /** @return ModelInterface|Token|null */
-    protected function apiCall(): ?ModelInterface
+    private function apiCall(): ?ModelInterface
     {
         $header = [
             'Authorization' => 'Basic ' . base64_encode(
@@ -95,7 +71,8 @@ class OAuthService
         $client = $this->getClient();
         $client->sandbox = $this->sandbox;
         $client->debug = $this->clientDebug;
-        $response = $client->post('/token', ['grant_type' => 'client_credentials'], $header);
+        $response = $client->post('/token?grant_type=client_credentials', [], $header);
+
         if ($response->getStatusCode() !== 200) {
             return null;
         }

@@ -9,11 +9,9 @@ use Enkap\OAuth\Interfaces\ModelInterface;
 
 class ModelQuery
 {
-    /** @var ModelInterface */
-    private $model;
+    private ModelInterface $model;
 
-    /** @var array */
-    private $whereData;
+    private array $whereData;
 
     public function __construct(ModelInterface $model)
     {
