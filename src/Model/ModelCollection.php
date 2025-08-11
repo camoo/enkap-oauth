@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace Enkap\OAuth\Model;
 
 use ArrayIterator;
+use Countable;
 use Enkap\OAuth\Exception\EnkapModelNotFoundException;
 use Enkap\OAuth\Interfaces\ModelInterface;
 use Enkap\OAuth\Lib\Json;
 use IteratorAggregate;
 
-class ModelCollection implements IteratorAggregate
+class ModelCollection implements IteratorAggregate, Countable
 {
     /** @var ModelInterface[]|string[] $values */
-    private $values = [];
+    private array $values = [];
 
     private function __construct(array $items, ?string $returnType)
     {

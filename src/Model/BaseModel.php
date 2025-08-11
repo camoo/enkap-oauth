@@ -7,6 +7,7 @@ namespace Enkap\OAuth\Model;
 use DateTime;
 use DateTimeInterface;
 use DateTimeZone;
+use Enkap\OAuth\Enum\HttpRequestType;
 use Enkap\OAuth\Exception\EnkapException;
 use Enkap\OAuth\Http\Client;
 use Enkap\OAuth\Http\ModelResponse;
@@ -26,7 +27,7 @@ use Exception;
  */
 abstract class BaseModel implements ModelInterface
 {
-    /** Keys for the meta properties array. */
+    /** Keys for the meta-properties array. */
     public const KEY_MANDATORY = 0;
 
     public const KEY_TYPE = 1;
@@ -393,7 +394,7 @@ abstract class BaseModel implements ModelInterface
             //If this object can update itself, set its own dirty flag, otherwise, set its parent's.
             if (count(array_intersect(
                 static::getSupportedMethods(),
-                [Client::PUT_REQUEST, Client::POST_REQUEST]
+                [HttpRequestType::PUT_REQUEST->value, HttpRequestType::POST_REQUEST->value]
             )) > 0) {
                 //Object can update itself
                 $this->setDirty($property);

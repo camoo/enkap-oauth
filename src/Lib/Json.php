@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace Enkap\OAuth\Lib;
 
 use Enkap\OAuth\Exception\EnkapException as Exception;
+use stdClass;
 
 class Json
 {
-    /** @var string $file */
-    private $file;
+    private ?string $file;
 
-    /** @var string $json */
-    private $json;
+    private ?string $json;
 
     public function __construct(?string $json = null, ?string $file = null)
     {
@@ -20,12 +19,8 @@ class Json
         $this->json = $json;
     }
 
-    /**
-     * decode json string
-     *
-     * @return array|object
-     */
-    public function decode(?string $sJSON = null, bool $bAsHash = true)
+    /** decode json string */
+    public function decode(?string $sJSON = null, bool $bAsHash = true): array|stdClass
     {
         $jsonData = $sJSON ?? $this->json;
 

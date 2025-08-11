@@ -31,13 +31,14 @@ class OAuthService
     public function getAccessToken(): string
     {
         $tokenCacheKeySuffix = $this->sandbox ? '_dev' : '_pro';
-        $tokenCacheKey = 'token' . $tokenCacheKeySuffix;
+        $tokenCacheKey = md5('\\Enkap\\OAuth\\' . 'token') . $tokenCacheKeySuffix;
         $accessToken = $this->cache->read($tokenCacheKey);
         if (!empty($accessToken)) {
             return $accessToken;
         }
 
         try {
+            /** @var Token $response */
             $response = $this->apiCall();
         } catch (Throwable $ex) {
             throw new EnKapAccessTokenException($ex->getMessage(), $ex->getCode(), $ex->getPrevious());
@@ -60,7 +61,6 @@ class OAuthService
         return ClientFactory::create($this, 'Token');
     }
 
-    /** @return ModelInterface|Token|null */
     private function apiCall(): ?ModelInterface
     {
         $header = [
@@ -69,8 +69,8 @@ class OAuthService
             ),
         ];
         $client = $this->getClient();
-        $client->sandbox = $this->sandbox;
-        $client->debug = $this->clientDebug;
+        $client->setSandbox($this->sandbox);
+        $client->setDebug($this->clientDebug);
         $response = $client->post('/token?grant_type=client_credentials', [], $header);
 
         if ($response->getStatusCode() !== 200) {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Enkap\OAuth\Model;
 
-use Enkap\OAuth\Http\Client;
+use Enkap\OAuth\Enum\HttpRequestType;
 
 /**
  * @property string $notification_url
@@ -23,7 +23,7 @@ class CallbackUrl extends BaseModel
     public static function getSupportedMethods(): array
     {
         return [
-            Client::PUT_REQUEST,
+            HttpRequestType::PUT_REQUEST->value,
         ];
     }
 
@@ -33,7 +33,7 @@ class CallbackUrl extends BaseModel
      *  [1] - Type
      *  [2] - PHP type
      *  [3] - Is an Array
-     *  [4] - Saves directly.
+     *  [4] - Save directly.
      */
     public static function getProperties(): array
     {

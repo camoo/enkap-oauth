@@ -8,14 +8,12 @@ use Enkap\OAuth\Model\ModelCollection;
 
 class ModelResponse
 {
-    /** @var ModelCollection */
-    private $collection;
+    private ModelCollection $collection;
 
-    /** @var array $headers */
-    private $headers;
+    /** @var array|string[] $headers */
+    private array $headers;
 
-    /** @var int */
-    private $code;
+    private int $code;
 
     public function __construct(ModelCollection $collection, int $code, array $headers)
     {
@@ -29,6 +27,7 @@ class ModelResponse
         return $this->code;
     }
 
+    /** @return array|string[] */
     public function getHeaders(): array
     {
         return $this->headers;

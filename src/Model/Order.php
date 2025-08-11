@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Enkap\OAuth\Model;
 
 use DateTimeInterface;
-use Enkap\OAuth\Http\Client;
+use Enkap\OAuth\Enum\HttpRequestType;
 use Enkap\OAuth\Http\ModelResponse;
 use Enkap\OAuth\Model\Asset\LineItem;
 use Enkap\OAuth\Model\Asset\OID;
@@ -44,9 +44,9 @@ class Order extends BaseModel
     public static function getSupportedMethods(): array
     {
         return [
-            Client::GET_REQUEST,
-            Client::POST_REQUEST,
-            Client::DELETE_REQUEST,
+            HttpRequestType::GET_REQUEST->value,
+            HttpRequestType::POST_REQUEST->value,
+            HttpRequestType::DELETE_REQUEST->value,
         ];
     }
 

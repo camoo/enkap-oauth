@@ -10,7 +10,7 @@ use Enkap\OAuth\Query\ModelQuery;
 
 class ModelAggregator
 {
-    private $model;
+    private ModelInterface $model;
 
     public function __construct(ModelInterface $model)
     {
@@ -19,17 +19,17 @@ class ModelAggregator
 
     public function has($offset): bool
     {
-        return $this->model->__isset($offset);
+        return isset($this->{$offset});
     }
 
     public function get($offset)
     {
-        return $this->model->__get($offset);
+        return $this->model->{$offset};
     }
 
     public function set($offset, $value)
     {
-        return $this->model->__set($offset, $value);
+        return $this->model->{$offset} = $value;
     }
 
     /** If the object supports a specific HTTP method. */

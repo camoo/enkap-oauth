@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Enkap\OAuth\Model;
 
 use DateTimeInterface;
-use Enkap\OAuth\Http\Client;
+use Enkap\OAuth\Enum\HttpRequestType;
 use Enkap\OAuth\Model\Asset\OID;
 
 /**
@@ -51,7 +51,7 @@ class Payment extends BaseModel
     public static function getSupportedMethods(): array
     {
         return [
-            Client::GET_REQUEST,
+            HttpRequestType::GET_REQUEST->value,
         ];
     }
 

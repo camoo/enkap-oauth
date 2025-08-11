@@ -13,17 +13,13 @@ use Enkap\OAuth\Lib\Json;
  */
 class Response
 {
-    /** @var Json $jsonData */
-    protected $jsonData;
+    protected Json $jsonData;
 
-    /** @var int $statusCode */
-    private $statusCode;
+    private int $statusCode;
 
-    /** @var string $content */
-    private $content;
+    private string $content;
 
-    /** @var array */
-    private $headers;
+    private array $headers;
 
     public function __construct(string $content = '', int $statusCode = 200, array $headers = [])
     {

@@ -4,14 +4,14 @@ SDK for e-nkap. SmobilPay e-commerce
 
 
 > **Note**
-> Only use this branch with PHP 8.1 and above
+> Only use this branch with PHP 8.2 and above
 
 > **Note**
-> Compatibility with PHP releases < 8.1 are being maintained in the v1.0 branch
+> Compatibility with PHP releases < 8.2 are being maintained in the v1.0 branch
 
 ## Installation
 
-```shell
+```bash
 composer require camoo/enkap-oauth
 ```
 
