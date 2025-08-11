@@ -40,7 +40,10 @@ class Status extends BaseModel
         if ($status && in_array($status, self::getAllowedStatus(), true)) {
             $status = PaymentStatus::from($status);
         } else {
+        if (!$status || !in_array($status, self::getAllowedStatus(), true)) {
             $status = PaymentStatus::UNKNOWN_STATUS;
+        } else {
+            $status = PaymentStatus::from($status);
         }
 
         return $status;
