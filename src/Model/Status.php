@@ -46,7 +46,9 @@ class Status extends BaseModel
             $status = PaymentStatus::UNKNOWN_STATUS;
         }
 
-        return $status;
+            return PaymentStatus::from($status);
+        }
+        return PaymentStatus::UNKNOWN_STATUS;
     }
 
     public function initialized(): bool
