@@ -36,7 +36,7 @@ class Status extends BaseModel
 
     public function getCurrent(): PaymentStatus
     {
-        $status = $this->_data['status'] = '';
+        $status = $this->_data['status'] ?? '';
         if ($status && in_array($status, self::getAllowedStatus(), true)) {
             $status = PaymentStatus::from($status);
         } else {

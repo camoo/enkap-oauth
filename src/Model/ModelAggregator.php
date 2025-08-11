@@ -19,7 +19,7 @@ class ModelAggregator
 
     public function has($offset): bool
     {
-        return isset($this->{$offset});
+        return isset($this->model->{$offset});
     }
 
     public function get($offset)
