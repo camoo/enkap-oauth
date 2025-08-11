@@ -42,7 +42,7 @@ final class Helper
 
                 return $match[0];
             };
-            $filtered = preg_replace_callback('%<[^>]*((?=<)|>|$)%', $callback, $filtered);
+            $filtered = preg_replace_callback('%<[^>]*?((?=<)|>|$)%', $callback, $filtered);
             $filtered = self::stripAllTags($filtered);
             $filtered = str_replace("<\n", "&lt;\n", $filtered);
         }
