@@ -190,7 +190,7 @@ class Client
             throw new EnkapHttpClientException(json_encode($validator->errors()));
         }
 
-        $configuration = new Configuration(timeout: self::ENKAP_CLIENT_TIMEOUT);
+        $configuration = new Configuration(self::ENKAP_CLIENT_TIMEOUT);
         $configuration->setDebug($this->getDebug());
         $configuration->setDebugFile($this->debugFile);
 
