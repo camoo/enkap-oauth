@@ -13,5 +13,4 @@ enum HttpRequestType: string
     case PUT_REQUEST = 'PUT';
 
     case DELETE_REQUEST = 'DELETE';
-
 }
