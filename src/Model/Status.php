@@ -37,18 +37,12 @@ class Status extends BaseModel
     public function getCurrent(): PaymentStatus
     {
         $status = $this->_data['status'] ?? '';
-        if ($status && in_array($status, self::getAllowedStatus(), true)) {
-            $status = PaymentStatus::from($status);
-        } else {
+
         if (!$status || !in_array($status, self::getAllowedStatus(), true)) {
-            $status = PaymentStatus::UNKNOWN_STATUS;
-        } else {
-            $status = PaymentStatus::UNKNOWN_STATUS;
+            return PaymentStatus::UNKNOWN_STATUS;
         }
 
-            return PaymentStatus::from($status);
-        }
-        return PaymentStatus::UNKNOWN_STATUS;
+        return PaymentStatus::from($status);
     }
 
     public function initialized(): bool
