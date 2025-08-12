@@ -6,6 +6,7 @@ namespace Enkap\OAuth\Services;
 
 use Camoo\Cache\Cache;
 use Camoo\Cache\CacheConfig;
+use Enkap\OAuth\Enum\HttpStatus;
 use Enkap\OAuth\Exception\EnKapAccessTokenException;
 use Enkap\OAuth\Http\Client;
 use Enkap\OAuth\Http\ClientFactory;
@@ -40,8 +41,8 @@ class OAuthService
         try {
             /** @var Token $response */
             $response = $this->apiCall();
-        } catch (Throwable $ex) {
-            throw new EnKapAccessTokenException($ex->getMessage(), $ex->getCode(), $ex->getPrevious());
+        } catch (Throwable $exception) {
+            throw new EnKapAccessTokenException($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
         }
 
         if ($response === null) {
@@ -73,7 +74,7 @@ class OAuthService
         $client->setDebug($this->clientDebug);
         $response = $client->post('/token?grant_type=client_credentials', [], $header);
 
-        if ($response->getStatusCode() !== 200) {
+        if ($response->getStatusCode() !== HttpStatus::OK->value) {
             return null;
         }
 

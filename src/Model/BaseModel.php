@@ -53,36 +53,33 @@ abstract class BaseModel implements ModelInterface
     /**
      * Container to the actual properties of the object.
      *
-     * @var array
+     * @var array<string, mixed>
      */
-    protected $_data;
+    protected array $modelData;
 
     /**
      * Holds a record of which properties have been changed.
      *
-     * @var array
+     * @var array<string, mixed>
      */
-    protected $_dirty;
+    protected array $dirty;
 
     /**
      * Holds a list of objects that hold child references to this one.
      *
      * @var self[]
      */
-    protected $_associated_objects;
+    protected array $associatedObjects;
 
     /**
      * Holds a ref to the application that was used to load the object,
      * enables shorthand $object->save();.
      */
-    protected ?Client $client;
-
-    public function __construct(?Client $client = null)
+    public function __construct(protected ?Client $client = null)
     {
-        $this->_dirty = [];
-        $this->_data = [];
-        $this->_associated_objects = [];
-        $this->client = $client;
+        $this->dirty = [];
+        $this->modelData = [];
+        $this->associatedObjects = [];
     }
 
     public function __call(string $method, array $params): mixed
@@ -98,7 +95,7 @@ abstract class BaseModel implements ModelInterface
     /** Magic method for testing if properties exist. */
     public function __isset(string $property): bool
     {
-        return isset($this->_data[$property]);
+        return isset($this->modelData[$property]);
     }
 
     /** Magic getter for accessing properties directly. */
@@ -139,16 +136,16 @@ abstract class BaseModel implements ModelInterface
     public function isDirty(?string $property = null): bool
     {
         if ($property === null) {
-            return count($this->_dirty) > 0;
+            return count($this->dirty) > 0;
         }
 
-        return isset($this->_dirty[$property]);
+        return isset($this->dirty[$property]);
     }
 
     /** Manually set a property as dirty. */
     public function setDirty(string $property): BaseModel
     {
-        $this->_dirty[$property] = true;
+        $this->dirty[$property] = true;
 
         return $this;
     }
@@ -157,9 +154,9 @@ abstract class BaseModel implements ModelInterface
     public function setClean(?string $property = null): BaseModel
     {
         if ($property === null) {
-            $this->_dirty = [];
+            $this->dirty = [];
         } else {
-            unset($this->_dirty[$property]);
+            unset($this->dirty[$property]);
         }
 
         return $this;
@@ -179,18 +176,18 @@ abstract class BaseModel implements ModelInterface
             $isArray = $meta[self::KEY_IS_ARRAY];
 
             //If set and NOT replace data, continue
-            if (!$replace_data && isset($this->_data[$property])) {
+            if (!$replace_data && isset($this->modelData[$property])) {
                 continue;
             }
 
             if (!isset($input_array[$property])) {
-                $this->_data[$property] = null;
+                $this->modelData[$property] = null;
 
                 continue;
             }
 
             if ($isArray && !is_array($input_array[$property])) {
-                $this->_data[$property] = null;
+                $this->modelData[$property] = null;
 
                 continue;
             }
@@ -206,14 +203,14 @@ abstract class BaseModel implements ModelInterface
                     }
                     $collection->append($cast);
                 }
-                $this->_data[$property] = $collection;
+                $this->modelData[$property] = $collection;
             } else {
                 $cast = self::castFromString($type, $input_array[$property], $php_type);
                 //Do this here so that you know it's not a static method call to ::castFromString
                 if ($cast instanceof self) {
                     $cast->addAssociatedObject($property, $this);
                 }
-                $this->_data[$property] = $cast;
+                $this->modelData[$property] = $cast;
             }
         }
     }
@@ -225,24 +222,24 @@ abstract class BaseModel implements ModelInterface
     {
         $out = [];
         foreach (static::getProperties() as $property => $meta) {
-            if (!isset($this->_data[$property])) {
+            if (!isset($this->modelData[$property])) {
                 continue;
             }
 
             //if we only want the dirty props, stop here
-            if ($dirty_only && !isset($this->_dirty[$property])) {
+            if ($dirty_only && !isset($this->dirty[$property])) {
                 continue;
             }
 
             $type = $meta[self::KEY_TYPE];
 
-            if ($this->_data[$property] instanceof Collection) {
+            if ($this->modelData[$property] instanceof Collection) {
                 $out[$property] = [];
-                foreach ($this->_data[$property] as $assoc_property) {
+                foreach ($this->modelData[$property] as $assoc_property) {
                     $out[$property][] = self::castToString($type, $assoc_property);
                 }
             } else {
-                $out[$property] = self::castToString($type, $this->_data[$property]);
+                $out[$property] = self::castToString($type, $this->modelData[$property]);
             }
         }
 
@@ -262,7 +259,7 @@ abstract class BaseModel implements ModelInterface
 
             //If it's got a GUID, it's already going to be valid almost all cases
             if ($mandatory) {
-                if (!isset($this->_data[$property]) || empty($this->_data[$property])) {
+                if (!isset($this->modelData[$property]) || empty($this->modelData[$property])) {
                     throw new EnkapException(
                         sprintf(
                             '%s::$%s is mandatory and is either missing or empty.',
@@ -273,12 +270,12 @@ abstract class BaseModel implements ModelInterface
                 }
 
                 if ($check_children) {
-                    if ($this->_data[$property] instanceof self) {
+                    if ($this->modelData[$property] instanceof self) {
                         //Keep IDEs happy
-                        $obj = $this->_data[$property];
+                        $obj = $this->modelData[$property];
                         $obj->validate();
-                    } elseif ($this->_data[$property] instanceof Collection) {
-                        foreach ($this->_data[$property] as $element) {
+                    } elseif ($this->modelData[$property] instanceof Collection) {
+                        foreach ($this->modelData[$property] as $element) {
                             if ($element instanceof self) {
                                 $element->validate();
                             }
@@ -375,12 +372,12 @@ abstract class BaseModel implements ModelInterface
 
     public function addAssociatedObject(string $property, self $object): void
     {
-        $this->_associated_objects[$property] = $object;
+        $this->associatedObjects[$property] = $object;
     }
 
     public function unset(string $offset): void
     {
-        unset($this->_data[$offset]);
+        unset($this->modelData[$offset]);
     }
 
     public function getClient(): ?Client
@@ -390,7 +387,7 @@ abstract class BaseModel implements ModelInterface
 
     protected function propertyUpdated(string $property, mixed $value): void
     {
-        if (!isset($this->_data[$property]) || $this->_data[$property] !== $value) {
+        if (!isset($this->modelData[$property]) || $this->modelData[$property] !== $value) {
             //If this object can update itself, set its own dirty flag, otherwise, set its parent's.
             if (count(array_intersect(
                 static::getSupportedMethods(),
@@ -400,7 +397,7 @@ abstract class BaseModel implements ModelInterface
                 $this->setDirty($property);
             } else {
                 //Object can't update itself, so tell its parents
-                foreach ($this->_associated_objects as $parent_property => $object) {
+                foreach ($this->associatedObjects as $parent_property => $object) {
                     $object->setDirty($parent_property);
                 }
             }

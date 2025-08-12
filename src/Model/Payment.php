@@ -57,46 +57,46 @@ class Payment extends BaseModel
 
     public function getPayerAccountName(): string
     {
-        return $this->_data['payerAccountName'];
+        return $this->modelData['payerAccountName'];
     }
 
     public function getPaymentProviderName(): string
     {
-        return $this->_data['paymentProviderName'];
+        return $this->modelData['paymentProviderName'];
     }
 
     public function getPaymentProviderId(): string
     {
-        return $this->_data['paymentProviderId'];
+        return $this->modelData['paymentProviderId'];
     }
 
     public function getPayerAccountNumber(): string
     {
-        return $this->_data['payerAccountNumber'];
+        return $this->modelData['payerAccountNumber'];
     }
 
     public function getId(): OID
     {
-        return $this->_data['id'];
+        return $this->modelData['id'];
     }
 
     public function getOrder(): ?Order
     {
-        return $this->_data['order'];
+        return $this->modelData['order'];
     }
 
     public function getPaymentStatus(): string
     {
-        return $this->_data['paymentStatus'];
+        return $this->modelData['paymentStatus'];
     }
 
     public function getOrderDate(): DateTimeInterface
     {
-        return $this->_data['orderDate'];
+        return $this->modelData['orderDate'];
     }
 
     public function getPaymentDate(): DateTimeInterface
     {
-        return $this->_data['paymentDate'];
+        return $this->modelData['paymentDate'];
     }
 }

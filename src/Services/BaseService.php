@@ -9,10 +9,8 @@ use Enkap\OAuth\Http\Client;
 use Enkap\OAuth\Http\ClientFactory;
 use Enkap\OAuth\Interfaces\ModelInterface;
 
-class BaseService
+abstract class BaseService
 {
-    protected const HTTP_SUCCESS_CODE = 200;
-
     protected Client $client;
 
     public function __construct(

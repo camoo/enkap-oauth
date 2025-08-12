@@ -10,6 +10,7 @@ use Camoo\Http\Curl\Infrastructure\Client as CamooClient;
 use Camoo\Http\Curl\Infrastructure\Request;
 use Enkap\OAuth\Enum\Endpoint;
 use Enkap\OAuth\Enum\HttpRequestType;
+use Enkap\OAuth\Enum\HttpStatus;
 use Enkap\OAuth\Exception\EnkapBadResponseException;
 use Enkap\OAuth\Exception\EnkapException;
 use Enkap\OAuth\Exception\EnkapHttpClientException;
@@ -204,7 +205,7 @@ class Client
             $request = $this->getRequest($configuration, $sMethod, $endPoint, $data, $hHeaders);
             $requestResponse = $client->sendRequest($request);
 
-            if (!in_array($requestResponse->getStatusCode(), [200, 201], true)) {
+            if (!in_array($requestResponse->getStatusCode(), [HttpStatus::OK->value, HttpStatus::CREATED->value], true)) {
                 throw new EnkapBadResponseException(
                     (string)$requestResponse->getBody(),
                     $requestResponse->getStatusCode()

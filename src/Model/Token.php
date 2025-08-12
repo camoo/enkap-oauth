@@ -19,9 +19,7 @@ class Token extends BaseModel
     /** Get the supported methods. */
     public static function getSupportedMethods(): array
     {
-        return [
-            HttpRequestType::POST_REQUEST->value,
-        ];
+        return [HttpRequestType::POST_REQUEST->value];
     }
 
     /**
@@ -44,22 +42,22 @@ class Token extends BaseModel
 
     public function getExpiresIn(): int
     {
-        return $this->_data['expires_in'];
+        return $this->modelData['expires_in'];
     }
 
     public function getAccessToken(): string
     {
-        return $this->_data['access_token'];
+        return $this->modelData['access_token'];
     }
 
     public function getTokenType(): ?string
     {
-        return $this->_data['token_type'];
+        return $this->modelData['token_type'];
     }
 
     public function getScope(): string
     {
-        return $this->_data['scope'];
+        return $this->modelData['scope'];
     }
 
     public function getModelName(): string

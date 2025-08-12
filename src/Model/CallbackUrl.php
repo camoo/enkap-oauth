@@ -22,9 +22,7 @@ class CallbackUrl extends BaseModel
     /** Get the supported methods. */
     public static function getSupportedMethods(): array
     {
-        return [
-            HttpRequestType::PUT_REQUEST->value,
-        ];
+        return [HttpRequestType::PUT_REQUEST->value];
     }
 
     /**
@@ -45,26 +43,26 @@ class CallbackUrl extends BaseModel
 
     public function getNotificationUrl(): string
     {
-        return $this->_data['notificationUrl'];
+        return $this->modelData['notificationUrl'];
     }
 
     public function setNotificationUrl(string $value): self
     {
         $this->propertyUpdated('notificationUrl', $value);
-        $this->_data['notificationUrl'] = $value;
+        $this->modelData['notificationUrl'] = $value;
 
         return $this;
     }
 
     public function getReturnUrl(): string
     {
-        return $this->_data['returnUrl'];
+        return $this->modelData['returnUrl'];
     }
 
     public function setReturnUrl(string $value): self
     {
         $this->propertyUpdated('returnUrl', $value);
-        $this->_data['returnUrl'] = $value;
+        $this->modelData['returnUrl'] = $value;
 
         return $this;
     }
