@@ -233,7 +233,7 @@ class Order extends BaseModel
         return $this;
     }
 
-    public function getReceiptUrl(): float
+    public function getReceiptUrl(): string
     {
         return $this->modelData['receiptUrl'];
     }
