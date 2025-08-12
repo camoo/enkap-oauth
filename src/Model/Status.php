@@ -24,9 +24,7 @@ class Status extends BaseModel
     /** @return array<string, mixed> */
     public static function getProperties(): array
     {
-        return [
-            'status' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
-        ];
+        return ['status' => [false, self::PROPERTY_TYPE_STRING, null, false, false]];
     }
 
     public function getCurrent(): PaymentStatus
@@ -74,8 +72,6 @@ class Status extends BaseModel
 
     public static function getSupportedMethods(): array
     {
-        return [
-            HttpRequestType::GET_REQUEST->value,
-        ];
+        return [HttpRequestType::GET_REQUEST->value];
     }
 }
