@@ -29,16 +29,11 @@ class Status extends BaseModel
         ];
     }
 
-    public static function getAllowedStatus(): array
-    {
-        return PaymentStatus::getAllStatuses();
-    }
-
     public function getCurrent(): PaymentStatus
     {
         $status = $this->modelData['status'] ?? null;
 
-        if ($status === null || !in_array($status, self::getAllowedStatus(), true)) {
+        if ($status === null || !in_array($status, PaymentStatus::getAllStatuses(), true)) {
             error_log(sprintf('[Status] Invalid ENKAP status value encountered: "%s"', $status));
 
             return PaymentStatus::UNKNOWN_STATUS;
