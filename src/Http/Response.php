@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Enkap\OAuth\Http;
 
+use Enkap\OAuth\Enum\HttpStatus;
 use Enkap\OAuth\Lib\Json;
 
 /**
@@ -13,24 +14,17 @@ use Enkap\OAuth\Lib\Json;
  */
 class Response
 {
-    /** @var Json $jsonData */
-    protected $jsonData;
+    private Json $jsonInstance;
 
-    /** @var int $statusCode */
-    private $statusCode;
-
-    /** @var string $content */
-    private $content;
-
-    /** @var array */
-    private $headers;
-
-    public function __construct(string $content = '', int $statusCode = 200, array $headers = [])
-    {
-        $this->statusCode = $statusCode;
-        $this->content = $content;
-        $this->jsonData = new Json($content);
-        $this->headers = $headers;
+    /**
+     * @param string[] $headers
+     */
+    public function __construct(
+        private readonly string $content = '',
+        private readonly int $statusCode = HttpStatus::OK->value,
+        private readonly array $headers = []
+    ) {
+        $this->jsonInstance = new Json($this->content);
     }
 
     public function getBody(): string
@@ -50,12 +44,12 @@ class Response
 
     public function getJson(): array
     {
-        if (!in_array($this->getStatusCode(), [200, 201])) {
+        if (!in_array($this->getStatusCode(), [HttpStatus::OK->value, HttpStatus::CREATED->value])) {
             $message = $this->content !== '' ? $this->content : 'request failed!';
 
             return ['message' => $message];
         }
 
-        return $this->jsonData->decode();
+        return $this->jsonInstance->decode();
     }
 }

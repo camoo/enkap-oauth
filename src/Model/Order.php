@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Enkap\OAuth\Model;
 
 use DateTimeInterface;
-use Enkap\OAuth\Http\Client;
+use Enkap\OAuth\Enum\HttpRequestType;
 use Enkap\OAuth\Http\ModelResponse;
 use Enkap\OAuth\Model\Asset\LineItem;
 use Enkap\OAuth\Model\Asset\OID;
@@ -44,9 +44,9 @@ class Order extends BaseModel
     public static function getSupportedMethods(): array
     {
         return [
-            Client::GET_REQUEST,
-            Client::POST_REQUEST,
-            Client::DELETE_REQUEST,
+            HttpRequestType::GET_REQUEST->value,
+            HttpRequestType::POST_REQUEST->value,
+            HttpRequestType::DELETE_REQUEST->value,
         ];
     }
 
@@ -84,104 +84,104 @@ class Order extends BaseModel
 
     public function getCurrency(): string
     {
-        return $this->_data['currency'];
+        return $this->modelData['currency'];
     }
 
     public function setCurrency(string $currency): Order
     {
         $this->propertyUpdated('currency', $currency);
-        $this->_data['currency'] = strtoupper($currency);
+        $this->modelData['currency'] = strtoupper($currency);
 
         return $this;
     }
 
     public function getCustomerName(): string
     {
-        return $this->_data['customerName'];
+        return $this->modelData['customerName'];
     }
 
     public function setCustomerName(string $value): Order
     {
         $this->propertyUpdated('customerName', $value);
-        $this->_data['customerName'] = $value;
+        $this->modelData['customerName'] = $value;
 
         return $this;
     }
 
     public function getDescription(): string
     {
-        return $this->_data['description'];
+        return $this->modelData['description'];
     }
 
     public function setDescription(string $value): Order
     {
         $this->propertyUpdated('description', $value);
-        $this->_data['description'] = $value;
+        $this->modelData['description'] = $value;
 
         return $this;
     }
 
     public function getEmail(): string
     {
-        return $this->_data['email'];
+        return $this->modelData['email'];
     }
 
     public function setEmail(string $value): Order
     {
         $this->propertyUpdated('email', $value);
-        $this->_data['email'] = $value;
+        $this->modelData['email'] = $value;
 
         return $this;
     }
 
     public function getExpiryDate(): DateTimeInterface
     {
-        return $this->_data['expiryDate'];
+        return $this->modelData['expiryDate'];
     }
 
     public function setExpiryDate(DateTimeInterface $value): Order
     {
         $this->propertyUpdated('expiryDate', $value);
-        $this->_data['expiryDate'] = $value;
+        $this->modelData['expiryDate'] = $value;
 
         return $this;
     }
 
     public function getOrderDate(): DateTimeInterface
     {
-        return $this->_data['orderDate'];
+        return $this->modelData['orderDate'];
     }
 
     public function setOrderDate(DateTimeInterface $value): Order
     {
         $this->propertyUpdated('orderDate', $value);
-        $this->_data['orderDate'] = $value;
+        $this->modelData['orderDate'] = $value;
 
         return $this;
     }
 
     public function getId(): OID
     {
-        return $this->_data['id'];
+        return $this->modelData['id'];
     }
 
     public function setId(string $value): Order
     {
         $this->propertyUpdated('id', $value);
-        $this->_data['id'] = $value;
+        $this->modelData['id'] = $value;
 
         return $this;
     }
 
     public function getLangKey(): string
     {
-        return $this->_data['langKey'];
+        return $this->modelData['langKey'];
     }
 
     public function setLangKey(string $value): Order
     {
         $this->propertyUpdated('langKey', $value);
-        $this->_data['langKey'] = $value;
+        $this->modelData['langKey'] = $value;
 
         return $this;
     }
@@ -189,59 +189,59 @@ class Order extends BaseModel
     public function setMerchantReference(string $value): Order
     {
         $this->propertyUpdated('merchantReference', $value);
-        $this->_data['merchantReference'] = $value;
+        $this->modelData['merchantReference'] = $value;
 
         return $this;
     }
 
     public function getOptRefOne(): string
     {
-        return $this->_data['optRefOne'];
+        return $this->modelData['optRefOne'];
     }
 
     public function setOptRefOne(string $value): Order
     {
         $this->propertyUpdated('optRefOne', $value);
-        $this->_data['optRefOne'] = $value;
+        $this->modelData['optRefOne'] = $value;
 
         return $this;
     }
 
     public function getOptRefTwo(): string
     {
-        return $this->_data['optRefTwo'];
+        return $this->modelData['optRefTwo'];
     }
 
     public function setOptRefTwo(string $value): Order
     {
         $this->propertyUpdated('optRefTwo', $value);
-        $this->_data['optRefTwo'] = $value;
+        $this->modelData['optRefTwo'] = $value;
 
         return $this;
     }
 
     public function getTotalAmount(): float
     {
-        return $this->_data['totalAmount'];
+        return $this->modelData['totalAmount'];
     }
 
     public function setTotalAmount(string $value): Order
     {
         $this->propertyUpdated('totalAmount', $value);
-        $this->_data['totalAmount'] = $value;
+        $this->modelData['totalAmount'] = $value;
 
         return $this;
     }
 
-    public function getReceiptUrl(): float
+    public function getReceiptUrl(): string
     {
-        return $this->_data['receiptUrl'];
+        return $this->modelData['receiptUrl'];
     }
 
     public function setReceiptUrl(string $value): Order
     {
         $this->propertyUpdated('receiptUrl', $value);
-        $this->_data['receiptUrl'] = $value;
+        $this->modelData['receiptUrl'] = $value;
 
         return $this;
     }
@@ -249,37 +249,37 @@ class Order extends BaseModel
     /** @return LineItem[]|Collection */
     public function getItems(): array|Collection
     {
-        if (!isset($this->_data['items'])) {
-            $this->_data['items'] = new Collection();
+        if (!isset($this->modelData['items'])) {
+            $this->modelData['items'] = new Collection();
         }
 
-        return $this->_data['items'];
+        return $this->modelData['items'];
     }
 
     public function setItems(LineItem $value): Order
     {
         $this->propertyUpdated('items', $value);
-        if (!isset($this->_data['items'])) {
-            $this->_data['items'] = new Collection();
+        if (!isset($this->modelData['items'])) {
+            $this->modelData['items'] = new Collection();
         }
-        $this->_data['items'][] = $value;
+        $this->modelData['items'][] = $value;
 
         return $this;
     }
 
     public function getMerchantReferenceId(): string
     {
-        return $this->_data['merchantReferenceId'];
+        return $this->modelData['merchantReferenceId'];
     }
 
     public function getOrderTransactionId(): string
     {
-        return $this->_data['orderTransactionId'];
+        return $this->modelData['orderTransactionId'];
     }
 
     public function getRedirectUrl(): string
     {
-        return $this->_data['redirectUrl'];
+        return $this->modelData['redirectUrl'];
     }
 
     public function getResourceURI(): string

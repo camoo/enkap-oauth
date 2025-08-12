@@ -8,6 +8,9 @@ use Camoo\Http\Curl\Domain\Client\ClientInterface;
 use Camoo\Http\Curl\Domain\Entity\Configuration;
 use Camoo\Http\Curl\Infrastructure\Client as CamooClient;
 use Camoo\Http\Curl\Infrastructure\Request;
+use Enkap\OAuth\Enum\Endpoint;
+use Enkap\OAuth\Enum\HttpRequestType;
+use Enkap\OAuth\Enum\HttpStatus;
 use Enkap\OAuth\Exception\EnkapBadResponseException;
 use Enkap\OAuth\Exception\EnkapException;
 use Enkap\OAuth\Exception\EnkapHttpClientException;
@@ -16,6 +19,7 @@ use Enkap\OAuth\Lib\Helper;
 use Enkap\OAuth\Model\ModelCollection;
 use Enkap\OAuth\Services\OAuthService;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\UriInterface;
 use Throwable;
 use Valitron\Validator;
 
@@ -24,53 +28,44 @@ use Valitron\Validator;
  */
 class Client
 {
-    public const GET_REQUEST = 'GET';
-
-    public const POST_REQUEST = 'POST';
-
-    public const PUT_REQUEST = 'PUT';
-
-    public const DELETE_REQUEST = 'DELETE';
-
-    private const ENKAP_API_URL_LIVE = 'https://api.enkap.cm';
-
-    private const ENKAP_API_URL_SANDBOX = 'https://api.enkap.maviance.info';
-
     private const ENKAP_CLIENT_TIMEOUT = 30;
 
     private const USER_AGENT_STRING = 'Enkap/CamooClient/%s (+https://github.com/camoo/enkap-oauth)';
 
-    private const API_VERSION = 'v1.2';
-
-    public bool $sandbox = false;
-
-    /** Debug switch (default set to false) */
-    public bool $debug = false;
-
-    /** Debug file location (log to STDOUT by default) */
-    public string $debugFile = 'php://output';
-
+    /**
+     * @var string[]
+     *
+     * @see Helper::getPackageVersion()
+     */
     protected array $userAgent = [];
 
+    /**
+     * @var array<string, null>
+     *
+     * @see HttpRequestType
+     */
     protected array $requestVerbs = [
-        self::GET_REQUEST => null,
-        self::POST_REQUEST => null,
-        self::PUT_REQUEST => null,
-        self::DELETE_REQUEST => null,
+        HttpRequestType::GET_REQUEST->value => null,
+        HttpRequestType::POST_REQUEST->value => null,
+        HttpRequestType::PUT_REQUEST->value => null,
+        HttpRequestType::DELETE_REQUEST->value => null,
     ];
 
-    private ?string $returnType;
+    private bool $sandbox = false;
 
+    /** Debug switch (default set to false) */
+    private bool $debug = false;
+
+    /** Debug file location (log to STDOUT by default) */
+    private string $debugFile = 'php://output';
+
+    /** @var string[] */
     private array $headers = [];
 
-    private OAuthService $authService;
-
-    public function __construct(OAuthService $authService, ?string $returnType = null)
+    public function __construct(private readonly OAuthService $authService, private ?string $returnType = null)
     {
         $this->addUserAgentString($this->getAPIInfo());
         $this->addUserAgentString(Helper::getPhpVersion());
-        $this->returnType = $returnType;
-        $this->authService = $authService;
     }
 
     public function addUserAgentString(string $userAgent): void
@@ -78,15 +73,23 @@ class Client
         $this->userAgent[] = $userAgent;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @param string[]             $headers
+     */
     public function post(
         string $uri,
         array $data = [],
         array $headers = [],
         ?ClientInterface $client = null
     ): ModelResponse {
-        return $this->performRequest(self::POST_REQUEST, $uri, $data, $headers, $client);
+        return $this->performRequest(HttpRequestType::POST_REQUEST, $uri, $data, $headers, $client);
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @param string[]             $headers
+     */
     public function get(
         ModelInterface $model,
         array $data = [],
@@ -97,7 +100,7 @@ class Client
         $this->returnType = $this->returnType ?? $model->getModelName();
         $suffix = $uri ?? $model->getResourceURI();
 
-        $suffix = DIRECTORY_SEPARATOR . self::API_VERSION . $suffix;
+        $suffix = DIRECTORY_SEPARATOR . Endpoint::API_VERSION->value . $suffix;
 
         $uri = sprintf('/purchase%s', $suffix);
         $header = [
@@ -105,7 +108,7 @@ class Client
         ];
         $headers += $header;
 
-        return $this->performRequest(self::GET_REQUEST, $uri, $data, $headers, $client);
+        return $this->performRequest(HttpRequestType::GET_REQUEST, $uri, $data, $headers, $client);
     }
 
     public function save(ModelInterface $model, bool $delete = false, ?ClientInterface $client = null): ModelResponse
@@ -118,18 +121,19 @@ class Client
         $this->returnType = $this->returnType ?? $model->getModelName();
 
         if ($delete === true) {
-            $method = self::DELETE_REQUEST;
+            $method = HttpRequestType::DELETE_REQUEST;
         } else {
-            $method = $model->isMethodSupported(self::PUT_REQUEST) ? self::PUT_REQUEST : self::POST_REQUEST;
+            $method = $model->isMethodSupported(HttpRequestType::PUT_REQUEST->value) ?
+                HttpRequestType::PUT_REQUEST : HttpRequestType::POST_REQUEST;
         }
 
         $suffix = $model->getResourceURI();
-        $suffix = DIRECTORY_SEPARATOR . self::API_VERSION . $suffix;
+        $suffix = DIRECTORY_SEPARATOR . Endpoint::API_VERSION->value . $suffix;
 
         $uri = sprintf('/purchase%s', $suffix);
 
-        if (!$model->isMethodSupported($method)) {
-            throw new EnkapException(sprintf('%s does not support [%s] via the API', get_class($model), $method));
+        if (!$model->isMethodSupported($method->value)) {
+            throw new EnkapException(sprintf('%s does not support [%s] via the API', get_class($model), $method->value));
         }
         $data = $model->toStringArray();
         $modelResponse = $this->performRequest($method, $uri, $data, $header, $client);
@@ -138,14 +142,33 @@ class Client
         return $modelResponse;
     }
 
+    public function setDebug(bool $debug): void
+    {
+        $this->debug = $debug;
+    }
+
+    public function setSandbox(bool $sandbox): void
+    {
+        $this->sandbox = $sandbox;
+    }
+
+    public function getSandbox(): bool
+    {
+        return $this->sandbox;
+    }
+
     /** @return string userAgentString */
     protected function getUserAgentString(): string
     {
         return implode(' ', $this->userAgent);
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @param string[]             $headers
+     */
     protected function performRequest(
-        string $method,
+        HttpRequestType $method,
         string $uri,
         array $data = [],
         array $headers = [],
@@ -154,11 +177,11 @@ class Client
         $this->setHeader($headers);
         //VALIDATE HEADERS
         $hHeaders = $this->getHeaders();
-        $sMethod = strtoupper($method);
+        $sMethod = strtoupper($method->value);
 
-        $mainUrl = $this->sandbox ? self::ENKAP_API_URL_SANDBOX : self::ENKAP_API_URL_LIVE;
+        $mainUrl = $this->sandbox ? Endpoint::ENKAP_API_URL_SANDBOX : Endpoint::ENKAP_API_URL_LIVE;
 
-        $endPoint = $mainUrl . $uri;
+        $endPoint = $mainUrl->value . $uri;
 
         $validator = new Validator(array_merge(['request' => $sMethod], $hHeaders));
 
@@ -182,7 +205,7 @@ class Client
             $request = $this->getRequest($configuration, $sMethod, $endPoint, $data, $hHeaders);
             $requestResponse = $client->sendRequest($request);
 
-            if (!in_array($requestResponse->getStatusCode(), [200, 201])) {
+            if (!in_array($requestResponse->getStatusCode(), [HttpStatus::OK->value, HttpStatus::CREATED->value], true)) {
                 throw new EnkapBadResponseException(
                     (string)$requestResponse->getBody(),
                     $requestResponse->getStatusCode()
@@ -195,7 +218,7 @@ class Client
                 $requestResponse->getHeaders()
             );
 
-            $data = $sMethod === self::DELETE_REQUEST ? [] : [$response->getJson()];
+            $data = $method === HttpRequestType::DELETE_REQUEST ? [] : [$response->getJson()];
 
             return new ModelResponse(
                 ModelCollection::create($data, $this->returnType),
@@ -211,11 +234,13 @@ class Client
         }
     }
 
+    /** @param string[] $option */
     protected function setHeader(array $option = []): void
     {
         $this->headers += $option;
     }
 
+    /** @return string[] */
     protected function getHeaders(): array
     {
         $default = [
@@ -230,10 +255,15 @@ class Client
         return sprintf(static::USER_AGENT_STRING, Helper::getPackageVersion());
     }
 
+    /** * Get request instance
+     *
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $headers
+     */
     protected function getRequest(
         Configuration $configuration,
         string $type,
-        string $uri,
+        string|UriInterface $uri,
         array $data = [],
         array $headers = []
     ): RequestInterface {

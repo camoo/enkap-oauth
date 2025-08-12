@@ -65,65 +65,65 @@ class LineItem extends BaseModel
 
     public function getDescription(): string
     {
-        return $this->_data['particulars'];
+        return $this->modelData['particulars'];
     }
 
     public function setDescription(string $value): LineItem
     {
         $this->propertyUpdated('particulars', $value);
-        $this->_data['particulars'] = $value;
+        $this->modelData['particulars'] = $value;
 
         return $this;
     }
 
     public function getQuantity(): string
     {
-        return $this->_data['quantity'];
+        return $this->modelData['quantity'];
     }
 
     public function setQuantity(string $value): LineItem
     {
         $this->propertyUpdated('quantity', $value);
-        $this->_data['quantity'] = $value;
+        $this->modelData['quantity'] = $value;
 
         return $this;
     }
 
     public function getUnitCost(): float
     {
-        return $this->_data['unitCost'];
+        return $this->modelData['unitCost'];
     }
 
     public function setUnitCost(float $value): LineItem
     {
         $this->propertyUpdated('unitCost', $value);
-        $this->_data['unitCost'] = $value;
+        $this->modelData['unitCost'] = $value;
 
         return $this;
     }
 
     public function getItemId(): string
     {
-        return $this->_data['itemId'];
+        return $this->modelData['itemId'];
     }
 
     public function setItemId(string $value): LineItem
     {
         $this->propertyUpdated('itemId', $value);
-        $this->_data['itemId'] = $value;
+        $this->modelData['itemId'] = $value;
 
         return $this;
     }
 
     public function getSubTotal(): float
     {
-        return $this->_data['subTotal'];
+        return $this->modelData['subTotal'];
     }
 
     public function setSubTotal(float $value): LineItem
     {
         $this->propertyUpdated('subTotal', $value);
-        $this->_data['subTotal'] = $value;
+        $this->modelData['subTotal'] = $value;
 
         return $this;
     }

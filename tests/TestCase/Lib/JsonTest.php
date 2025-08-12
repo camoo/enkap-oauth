@@ -4,12 +4,16 @@ namespace Enkap\OAuth\Test\TestCase\Lib;
 
 use Enkap\OAuth\Exception\EnkapException;
 use Enkap\OAuth\Lib\Json;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
+#[CoversClass(Json::class)]
+#[Group('Lib')]
 class JsonTest extends TestCase
 {
-    private $json;
+    private Json $json;
 
     protected function setUp(): void
     {

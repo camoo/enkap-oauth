@@ -6,22 +6,11 @@ namespace Enkap\OAuth\Http;
 
 use Enkap\OAuth\Model\ModelCollection;
 
-class ModelResponse
+readonly class ModelResponse
 {
-    /** @var ModelCollection */
-    private $collection;
-
-    /** @var array $headers */
-    private $headers;
-
-    /** @var int */
-    private $code;
-
-    public function __construct(ModelCollection $collection, int $code, array $headers)
+    /** @param  array|string[] $headers */
+    public function __construct(private ModelCollection $collection, private int $code, private array $headers)
     {
-        $this->collection = $collection;
-        $this->headers = $headers;
-        $this->code = $code;
     }
 
     public function getStatusCode(): int
@@ -29,6 +18,7 @@ class ModelResponse
         return $this->code;
     }
 
+    /** @return array|string[] */
     public function getHeaders(): array
     {
         return $this->headers;

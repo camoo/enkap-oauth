@@ -4,22 +4,11 @@ declare(strict_types=1);
 
 namespace Enkap\OAuth\Model;
 
-use Enkap\OAuth\Http\Client;
+use Enkap\OAuth\Enum\HttpRequestType;
+use Enkap\OAuth\Enum\PaymentStatus;
 
 class Status extends BaseModel
 {
-    public const CREATED_STATUS = 'CREATED';
-
-    public const INITIALISED_STATUS = 'INITIALISED';
-
-    public const IN_PROGRESS_STATUS = 'IN_PROGRESS';
-
-    public const CONFIRMED_STATUS = 'CONFIRMED';
-
-    public const FAILED_STATUS = 'FAILED';
-
-    public const CANCELED_STATUS = 'CANCELED';
-
     private const MODEL_NAME = 'Status';
 
     public function getModelName(): string
@@ -32,64 +21,57 @@ class Status extends BaseModel
         return '/api/order/status';
     }
 
+    /** @return array<string, mixed> */
     public static function getProperties(): array
     {
-        return [
-            'status' => [false, self::PROPERTY_TYPE_STRING, null, false, false],
-        ];
+        return ['status' => [false, self::PROPERTY_TYPE_STRING, null, false, false]];
     }
 
-    public static function getAllowedStatus(): array
+    public function getCurrent(): PaymentStatus
     {
-        return [
-            self::CREATED_STATUS,
-            self::INITIALISED_STATUS,
-            self::IN_PROGRESS_STATUS,
-            self::CONFIRMED_STATUS,
-            self::FAILED_STATUS,
-            self::CANCELED_STATUS,
-        ];
-    }
+        $status = $this->modelData['status'] ?? null;
 
-    public function getCurrent(): string
-    {
-        return $this->_data['status'];
+        if ($status === null || !PaymentStatus::isValidStatus($status)) {
+            error_log(sprintf('[Status] Invalid ENKAP status value encountered: "%s"', $status));
+
+            return PaymentStatus::UNKNOWN_STATUS;
+        }
+
+        return PaymentStatus::from($status);
     }
 
     public function initialized(): bool
     {
-        return $this->getCurrent() === self::INITIALISED_STATUS;
+        return $this->getCurrent()->is(PaymentStatus::INITIALISED_STATUS);
     }
 
     public function confirmed(): bool
     {
-        return $this->getCurrent() === self::CONFIRMED_STATUS;
+        return $this->getCurrent()->is(PaymentStatus::CONFIRMED_STATUS);
     }
 
     public function canceled(): bool
     {
-        return $this->getCurrent() === self::CANCELED_STATUS;
+        return $this->getCurrent()->is(PaymentStatus::CANCELED_STATUS);
     }
 
     public function failed(): bool
     {
-        return $this->getCurrent() === self::FAILED_STATUS;
+        return $this->getCurrent()->is(PaymentStatus::FAILED_STATUS);
     }
 
     public function created(): bool
     {
-        return $this->getCurrent() === self::CREATED_STATUS;
+        return $this->getCurrent()->is(PaymentStatus::CREATED_STATUS);
     }
 
     public function isInProgress(): bool
     {
-        return $this->getCurrent() === self::IN_PROGRESS_STATUS;
+        return $this->getCurrent()->is(PaymentStatus::IN_PROGRESS_STATUS);
     }
 
     public static function getSupportedMethods(): array
     {
-        return [
-            Client::GET_REQUEST,
-        ];
+        return [HttpRequestType::GET_REQUEST->value];
     }
 }

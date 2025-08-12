@@ -11,6 +11,7 @@ use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException;
 use Defuse\Crypto\Key;
 use Enkap\OAuth\Exception\EnkapException;
+use JetBrains\PhpStorm\NoReturn;
 use Throwable;
 
 /**
@@ -24,7 +25,7 @@ final class Helper
 
     private const PACKAGE_NAME = 'camoo/enkap-oauth';
 
-    public static function satanise($str, $keep_newlines = false)
+    public static function satanise(mixed $str, bool $keep_newlines = false): array|string
     {
         if (is_object($str) || is_array($str)) {
             return '';
@@ -33,9 +34,9 @@ final class Helper
         if (!mb_check_encoding($filtered, 'UTF-8')) {
             return '';
         }
-        if (strpos($filtered, '<') !== false) {
+        if (str_contains($filtered, '<')) {
             $callback = function ($match) {
-                if (false === strpos($match[0], '>')) {
+                if (!str_contains($match[0], '>')) {
                     return htmlentities($match[0], ENT_QUOTES | ENT_IGNORE, 'UTF-8');
                 }
 
@@ -108,6 +109,7 @@ final class Helper
     }
 
     /** Exit function */
+    #[NoReturn]
     public static function exitOrDie(): void
     {
         exit(0);
@@ -131,12 +133,7 @@ final class Helper
 
     public static function getPhpVersion(): string
     {
-        if (!defined('PHP_VERSION_ID')) {
-            $version = explode('.', PHP_VERSION);
-            define('PHP_VERSION_ID', $version[0] * 10000 + $version[1] * 100 + $version[2]);
-        }
-
-        return 'PHP/' . PHP_VERSION_ID;
+        return 'PHP/' . PHP_VERSION;
     }
 
     public static function isAssoc(array $array): bool
@@ -165,7 +162,7 @@ final class Helper
             $pairs[] = sprintf($format, $key, $val);
         }
 
-        //Return array if no glue provided
+        //Return an array if no glue provided
         if ($glue === null) {
             return $pairs;
         }
@@ -185,15 +182,16 @@ final class Helper
         }
         try {
             $version = InstalledVersions::getPrettyVersion(self::PACKAGE_NAME);
-        } catch (Throwable $exception) {
+        } catch (Throwable) {
             $version = self::ENKAP_CLIENT_VERSION;
         }
 
         return $version;
     }
 
-    public static function camelize(string $string, bool $capitalizeFirstCharacter = false)
+    public static function camelize(string $string, bool $capitalizeFirstCharacter = false): string
     {
+        /** @var string $str */
         $str = str_replace('_', '', ucwords($string, '_'));
 
         if (!$capitalizeFirstCharacter) {

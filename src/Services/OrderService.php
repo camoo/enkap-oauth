@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Enkap\OAuth\Services;
 
+use Enkap\OAuth\Enum\HttpStatus;
 use Enkap\OAuth\Interfaces\ModelInterface;
 use Enkap\OAuth\Model\Order;
 
 class OrderService extends BaseService
 {
-    /** @param Order|ModelInterface $order */
-    public function place(Order $order): ?Order
+    public function place(Order $order): ModelInterface
     {
         $order->setClient($this->client);
         $collection = $order->save();
@@ -18,12 +18,11 @@ class OrderService extends BaseService
         return $collection->getResult()->firstOrFail();
     }
 
-    /** @param Order|ModelInterface $order */
     public function delete(Order $order): ?bool
     {
         $order->setClient($this->client);
         $response = $order->delete();
 
-        return $response->getStatusCode() === self::HTTP_SUCCESS_CODE;
+        return $response->getStatusCode() === HttpStatus::OK->value;
     }
 }

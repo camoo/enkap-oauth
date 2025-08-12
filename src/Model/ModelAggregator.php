@@ -8,13 +8,10 @@ use Enkap\OAuth\Exception\EnkapException;
 use Enkap\OAuth\Interfaces\ModelInterface;
 use Enkap\OAuth\Query\ModelQuery;
 
-class ModelAggregator
+readonly class ModelAggregator
 {
-    private $model;
-
-    public function __construct(ModelInterface $model)
+    public function __construct(private ModelInterface $model)
     {
-        $this->model = $model;
     }
 
     public function has($offset): bool
@@ -22,14 +19,14 @@ class ModelAggregator
         return $this->model->__isset($offset);
     }
 
-    public function get($offset)
+    public function get(string $offset): mixed
     {
-        return $this->model->__get($offset);
+        return $this->model->{$offset};
     }
 
-    public function set($offset, $value)
+    public function set(string $offset, mixed $value)
     {
-        return $this->model->__set($offset, $value);
+        return $this->model->{$offset} = $value;
     }
 
     /** If the object supports a specific HTTP method. */

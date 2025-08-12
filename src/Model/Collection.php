@@ -7,11 +7,11 @@ use ArrayObject;
 class Collection extends ArrayObject
 {
     /** @var BaseModel[] */
-    protected $_associated_objects;
+    protected array $associatedObjects;
 
-    public function addAssociatedObject($parent_property, BaseModel $object)
+    public function addAssociatedObject($parent_property, BaseModel $object): void
     {
-        $this->_associated_objects[$parent_property] = $object;
+        $this->associatedObjects[$parent_property] = $object;
     }
 
     /** Return whether the Collection is 0 */
@@ -23,13 +23,11 @@ class Collection extends ArrayObject
     /**
      * Remove an item at a specific index.
      */
-    public function removeAt($index)
+    public function removeAt($index): void
     {
         if (isset($this[$index])) {
-            foreach ($this->_associated_objects as $parent_property => $object) {
-                /**
-                 * @var BaseModel
-                 */
+            foreach ($this->associatedObjects as $parent_property => $object) {
+
                 $object->setDirty($parent_property);
             }
             unset($this[$index]);
@@ -37,7 +35,7 @@ class Collection extends ArrayObject
     }
 
     /** Remove a specific object from the collection. */
-    public function remove(BaseModel $object)
+    public function remove(BaseModel $object): void
     {
         foreach ($this as $index => $item) {
             if ($item === $object) {
@@ -47,12 +45,9 @@ class Collection extends ArrayObject
     }
 
     /** Remove all the values' in the collection. */
-    public function removeAll()
+    public function removeAll(): void
     {
-        foreach ($this->_associated_objects as $parent_property => $object) {
-            /**
-             * @var BaseModel
-             */
+        foreach ($this->associatedObjects as $parent_property => $object) {
             $object->setDirty($parent_property);
         }
         $this->exchangeArray([]);

@@ -8,12 +8,9 @@ use Enkap\OAuth\Exception\EnkapException;
 use Enkap\OAuth\Http\Client;
 use Enkap\OAuth\Http\ClientFactory;
 use Enkap\OAuth\Interfaces\ModelInterface;
-use Enkap\OAuth\Model\BaseModel;
 
-class BaseService
+abstract class BaseService
 {
-    protected const HTTP_SUCCESS_CODE = 200;
-
     protected Client $client;
 
     public function __construct(
@@ -23,11 +20,10 @@ class BaseService
         bool $clientDebug = false
     ) {
         $this->client = ClientFactory::create(new OAuthService($consumerKey, $consumerSecret, $sandbox));
-        $this->client->sandbox = $sandbox;
-        $this->client->debug = $clientDebug;
+        $this->client->setSandbox($sandbox);
+        $this->client->setDebug($clientDebug);
     }
 
-    /** @return ModelInterface|BaseModel */
     public function loadModel(string $modelName): ModelInterface
     {
         if (!class_exists($modelName)) {

@@ -9,15 +9,15 @@ use Enkap\OAuth\Interfaces\ModelInterface;
 
 class ModelQuery
 {
-    private ModelInterface $model;
-
     private array $whereData;
 
-    public function __construct(ModelInterface $model)
+    public function __construct(private readonly ModelInterface $model)
     {
-        $this->model = $model;
     }
 
+    /**
+     * @param array<string, mixed> $where
+     */
     public function where(array $where): self
     {
         $this->whereData = $where;
