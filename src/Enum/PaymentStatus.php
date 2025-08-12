@@ -6,6 +6,7 @@ namespace Enkap\OAuth\Enum;
 
 enum PaymentStatus: string
 {
+    /** @return string[] */
     public static function getAllStatuses(): array
     {
         return array_map(fn (PaymentStatus $status) => $status->value, self::cases());

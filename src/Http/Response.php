@@ -12,14 +12,19 @@ use Enkap\OAuth\Lib\Json;
  *
  * @author CamooSarl
  */
-readonly class Response
+class Response
 {
+    private Json $jsonInstance;
+
+    /**
+     * @param string[] $headers
+     */
     public function __construct(
-        private string $content = '',
-        private int $statusCode = HttpStatus::OK->value,
-        private array $headers = [],
-        private ?Json $jsonData = null
+        private readonly string $content = '',
+        private readonly int $statusCode = HttpStatus::OK->value,
+        private readonly array $headers = []
     ) {
+        $this->jsonInstance = new Json($this->content);
     }
 
     public function getBody(): string
@@ -45,11 +50,6 @@ readonly class Response
             return ['message' => $message];
         }
 
-        return $this->getJsonInstance()->decode();
-    }
-
-    private function getJsonInstance(): Json
-    {
-        return $this->jsonData ?? new Json($this->content);
+        return $this->jsonInstance->decode();
     }
 }
