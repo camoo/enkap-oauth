@@ -33,7 +33,7 @@ class Status extends BaseModel
     {
         $status = $this->modelData['status'] ?? null;
 
-        if ($status === null || PaymentStatus::isValidStatus($status)) {
+        if ($status === null || !PaymentStatus::isValidStatus($status)) {
             error_log(sprintf('[Status] Invalid ENKAP status value encountered: "%s"', $status));
 
             return PaymentStatus::UNKNOWN_STATUS;
