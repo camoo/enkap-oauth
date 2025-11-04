@@ -15,9 +15,7 @@ class ModelQuery
     {
     }
 
-    /**
-     * @param array<string, mixed> $where
-     */
+    /** @param array<string, mixed> $where */
     public function where(array $where): self
     {
         $this->whereData = $where;
