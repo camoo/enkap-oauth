@@ -17,9 +17,11 @@ use Throwable;
 
 final class OAuthService
 {
-    private const DEFAULT_GRANT_TYPE = 'client_credentials';
+    private const DEFAULT_GRANT_TYPE = GrantType::CLIENT_CREDENTIALS->value;
 
     private const DEFAULT_TYPE = 'Token';
+
+    private const TOKEN_EXPIRY_BUFFER = 60;
 
     private Cache $cache;
 
@@ -64,9 +66,9 @@ final class OAuthService
         $cacheSuffix = $this->sandbox ? '_dev' : '_pro';
         $cacheDiscriminator = match ($grant) {
             GrantType::PASSWORD => $params['username'] ?? '',
-            GrantType::REFRESH_TOKEN => substr(hash('xxh3', (string)($params['refresh_token'] ?? '')), 0, 16),
-            GrantType::AUTH_CODE => substr(hash('xxh3', (string)($params['code'] ?? '')), 0, 16),
-            GrantType::TOKEN_EXCHANGE => substr(hash('xxh3', ($params['subject_token'] ?? '') . '|' . ($params['audience'] ?? '')), 0, 16),
+            GrantType::REFRESH_TOKEN => substr(hash('sha256', (string)($params['refresh_token'] ?? '')), 0, 16),
+            GrantType::AUTH_CODE => substr(hash('sha256', (string)($params['code'] ?? '')), 0, 16),
+            GrantType::TOKEN_EXCHANGE => substr(hash('sha256', ($params['subject_token'] ?? '') . '|' . ($params['audience'] ?? '')), 0, 16),
             default => '',
         };
 
@@ -87,7 +89,7 @@ final class OAuthService
         }
 
         $accessToken = $response->getAccessToken();
-        $ttl = max(1, $response->getExpiresIn() - 60);
+        $ttl = max(1, $response->getExpiresIn() - self::TOKEN_EXPIRY_BUFFER);
         $this->cache->write($tokenCacheKey, $accessToken, $ttl);
 
         return $accessToken;

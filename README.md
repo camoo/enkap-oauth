@@ -152,7 +152,7 @@ $result = $setup->set($callBack);
 if ($result === true) {
   // Callback URLs have been set
   //...
-}else {
+} else {
   // Failed to set Callback URLs
   //...
 }
