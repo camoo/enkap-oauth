@@ -6,6 +6,7 @@ namespace Enkap\OAuth\Services;
 
 use Camoo\Cache\Cache;
 use Camoo\Cache\CacheConfig;
+use Enkap\OAuth\Enum\GrantType;
 use Enkap\OAuth\Enum\HttpStatus;
 use Enkap\OAuth\Exception\EnKapAccessTokenException;
 use Enkap\OAuth\Http\Client;
@@ -14,8 +15,14 @@ use Enkap\OAuth\Interfaces\ModelInterface;
 use Enkap\OAuth\Model\Token;
 use Throwable;
 
-class OAuthService
+final class OAuthService
 {
+    private const DEFAULT_GRANT_TYPE = GrantType::CLIENT_CREDENTIALS->value;
+
+    private const DEFAULT_TYPE = 'Token';
+
+    private const TOKEN_EXPIRY_BUFFER = 60;
+
     private Cache $cache;
 
     public function __construct(
@@ -25,59 +32,173 @@ class OAuthService
         private readonly bool $clientDebug = false
     ) {
         $cryptoSalt = $_ENV['CRYPTO_SALT'] ?? null;
-        $cacheEncrypt = null !== $cryptoSalt;
-        $this->cache = new Cache(CacheConfig::fromArray(['crypto_salt' => $cryptoSalt, 'encrypt' => $cacheEncrypt]));
+        $this->cache = new Cache(CacheConfig::fromArray([
+            'crypto_salt' => $cryptoSalt,
+            'encrypt' => $cryptoSalt !== null,
+        ]));
     }
 
-    public function getAccessToken(): string
+    /**
+     * Request an access token for the selected grant.
+     *
+     * @param array{
+     *   scope?: string,
+     *   // PASSWORD
+     *   username?: string, password?: string,
+     *   // REFRESH_TOKEN
+     *   refresh_token?: string,
+     *   // AUTH_CODE
+     *   code?: string, redirect_uri?: string, code_verifier?: string,
+     *   // JWT_BEARER
+     *   assertion?: string,
+     *   // SAML2_BEARER
+     *   saml_assertion?: string,
+     *   // TOKEN_EXCHANGE (RFC 8693)
+     *   subject_token?: string, subject_token_type?: string,
+     *   actor_token?: string, actor_token_type?: string,
+     *   audience?: string, requested_token_type?: string
+     * } $params
+     */
+    public function getAccessToken(?GrantType $grant = null, array $params = []): string
     {
-        $tokenCacheKeySuffix = $this->sandbox ? '_dev' : '_pro';
-        $tokenCacheKey = md5('\\Enkap\\OAuth\\' . 'token') . $tokenCacheKeySuffix;
-        $accessToken = $this->cache->read($tokenCacheKey);
-        if (!empty($accessToken)) {
-            return $accessToken;
+        $grant ??= $this->getGrantType();
+        // cache key includes env + grant + identity of the request
+        $cacheSuffix = $this->sandbox ? '_dev' : '_pro';
+        $cacheDiscriminator = match ($grant) {
+            GrantType::PASSWORD => $params['username'] ?? '',
+            GrantType::REFRESH_TOKEN => substr(hash('sha256', (string)($params['refresh_token'] ?? '')), 0, 16),
+            GrantType::AUTH_CODE => substr(hash('sha256', (string)($params['code'] ?? '')), 0, 16),
+            GrantType::TOKEN_EXCHANGE => substr(hash('sha256', ($params['subject_token'] ?? '') . '|' . ($params['audience'] ?? '')), 0, 16),
+            default => '',
+        };
+
+        $tokenCacheKey = md5("\\Enkap\\OAuth\\token|{$grant->value}|{$cacheDiscriminator}") . $cacheSuffix;
+        if ($cached = $this->cache->read($tokenCacheKey)) {
+            return $cached;
         }
 
         try {
-            /** @var Token $response */
-            $response = $this->apiCall();
+            /** @var Token|null $response */
+            $response = $this->apiCall($grant, $params);
         } catch (Throwable $exception) {
-            throw new EnKapAccessTokenException($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
+            throw new EnKapAccessTokenException($exception->getMessage(), (int)$exception->getCode(), $exception);
         }
 
         if ($response === null) {
-            throw new EnKapAccessTokenException(
-                'Access Token cannot be retrieved. Please check your credentials'
-            );
+            throw new EnKapAccessTokenException('Access Token cannot be retrieved. Please check your credentials');
         }
+
         $accessToken = $response->getAccessToken();
-        $expiresIn = $response->getExpiresIn();
-        $this->cache->write($tokenCacheKey, $accessToken, $expiresIn);
+        $ttl = max(1, $response->getExpiresIn() - self::TOKEN_EXPIRY_BUFFER);
+        $this->cache->write($tokenCacheKey, $accessToken, $ttl);
 
         return $accessToken;
     }
 
-    private function getClient(): Client
+    private function getGrantType(): GrantType
     {
-        return ClientFactory::create($this, 'Token');
+        $grantType = $_ENV['GRANT_TYPE'] ?? self::DEFAULT_GRANT_TYPE;
+        try {
+            return GrantType::fromName($grantType);
+        } catch (Throwable $exception) {
+            throw new EnKapAccessTokenException(sprintf('Invalid grant type: %s', $grantType), 0, $exception);
+        }
     }
 
-    private function apiCall(): ?ModelInterface
+    private function getClient(): Client
     {
-        $header = [
-            'Authorization' => 'Basic ' . base64_encode(
-                sprintf('%s:%s', $this->consumerKey, $this->consumerSecret)
-            ),
-        ];
-        $client = $this->getClient();
+        $client = ClientFactory::create($this, self::DEFAULT_TYPE);
         $client->setSandbox($this->sandbox);
         $client->setDebug($this->clientDebug);
-        $response = $client->post('/token?grant_type=client_credentials', [], $header);
+
+        return $client;
+    }
+
+    private function apiCall(GrantType $grant, array $params): ?ModelInterface
+    {
+        $header = [
+            'Authorization' => 'Basic ' . base64_encode(sprintf('%s:%s', $this->consumerKey, $this->consumerSecret)),
+            'Content-Type' => 'application/x-www-form-urlencoded',
+        ];
+
+        $body = $this->buildBody($grant, $params);
+
+        $response = $this->getClient()->post('/token?' . http_build_query($body), [], $header);
 
         if ($response->getStatusCode() !== HttpStatus::OK->value) {
             return null;
         }
 
         return $response->getResult()->firstOrFail();
+    }
+
+    /**
+     * Build the request body based on the grant type and parameters.
+     *
+     * @param array<string,mixed> $params
+     *
+     * @return array<string,string>
+     */
+    private function buildBody(GrantType $grant, array $params): array
+    {
+        // Common base
+        $body = ['grant_type' => $grant->value];
+
+        // Optional shared param
+        if (!empty($params['scope'])) {
+            $body['scope'] = (string)$params['scope'];
+        }
+
+        // Grant-specific requirements
+        return match ($grant) {
+            GrantType::CLIENT_CREDENTIALS, GrantType::IWA_NTLM => $body,
+
+            GrantType::PASSWORD => $this->requireParams($body, $params, ['username', 'password']),
+
+            GrantType::REFRESH_TOKEN => $this->requireParams($body, $params, ['refresh_token']),
+
+            GrantType::AUTH_CODE => $this->requireParams(
+                $body + ['redirect_uri' => (string)($params['redirect_uri'] ?? '')],
+                $params,
+                ['code', 'redirect_uri'],
+                optional: ['code_verifier']
+            ),
+
+            GrantType::JWT_BEARER => $this->requireParams($body, $params, ['assertion']),
+
+            GrantType::SAML2_BEARER => $this->requireParams($body, $params, ['saml_assertion']),
+
+            GrantType::TOKEN_EXCHANGE => $this->requireParams(
+                $body,
+                $params,
+                ['subject_token', 'subject_token_type'],
+                optional: ['actor_token', 'actor_token_type', 'audience', 'requested_token_type']
+            ),
+        };
+    }
+
+    /**
+     * @param array<string,string> $base
+     * @param array<string,mixed>  $params
+     * @param string[]             $required
+     * @param string[]             $optional
+     *
+     * @return array<string,string>
+     */
+    private function requireParams(array $base, array $params, array $required, array $optional = []): array
+    {
+        foreach ($required as $key) {
+            if (!isset($params[$key]) || $params[$key] === '') {
+                throw new EnKapAccessTokenException(sprintf('Missing required parameter: %s', $key));
+            }
+            $base[$key] = (string)$params[$key];
+        }
+        foreach ($optional as $key) {
+            if (isset($params[$key]) && $params[$key] !== '') {
+                $base[$key] = (string)$params[$key];
+            }
+        }
+
+        return $base;
     }
 }

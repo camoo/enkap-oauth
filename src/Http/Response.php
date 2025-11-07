@@ -16,9 +16,7 @@ class Response
 {
     private Json $jsonInstance;
 
-    /**
-     * @param string[] $headers
-     */
+    /** @param string[] $headers */
     public function __construct(
         private readonly string $content = '',
         private readonly int $statusCode = HttpStatus::OK->value,

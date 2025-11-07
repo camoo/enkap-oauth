@@ -5,38 +5,36 @@ declare(strict_types=1);
 namespace Enkap\OAuth\Lib;
 
 use Enkap\OAuth\Exception\EnkapException as Exception;
+use JsonException;
 use stdClass;
 
-class Json
+final readonly class Json
 {
-    private ?string $file;
-
-    private ?string $json;
-
-    public function __construct(?string $json = null, ?string $file = null)
+    public function __construct(private ?string $json = null, private ?string $file = null)
     {
-        $this->file = $file;
-        $this->json = $json;
     }
 
     /** decode json string */
-    public function decode(?string $sJSON = null, bool $bAsHash = true): array|stdClass
+    public function decode(?string $sJSON = null, bool $asArray = true): array|stdClass
     {
-        $jsonData = $sJSON ?? $this->json;
+        $data = $sJSON ?? $this->json;
 
-        if (null === $jsonData) {
+        if (null === $data) {
             throw new Exception('Cannot decode on NULL');
         }
-        if ($jsonData === '') {
-            return [];
+        if ($data === '') {
+            return $asArray ? [] : new stdClass();
         }
 
-        if (($xData = json_decode($jsonData, $bAsHash)) !== null
-            && (json_last_error() === JSON_ERROR_NONE)) {
-            return $xData;
+        try {
+            /** @var array|stdClass $decoded */
+            $decoded = json_decode($data, $asArray, 512, JSON_THROW_ON_ERROR);
+
+        } catch (JsonException $e) {
+            throw new Exception(sprintf('JSON decode error: %s', $e->getMessage()), 0, $e);
         }
 
-        throw new Exception(json_last_error_msg());
+        return $decoded;
     }
 
     /**
@@ -44,20 +42,24 @@ class Json
      *
      * @throws Exception
      */
-    public function read(?string $sFile = null): array
+    public function read(?string $file = null): array
     {
-        $fileName = $sFile ?? $this->file;
+        $filePath = $file ?? $this->file;
 
-        if (null === $fileName || !is_file($fileName)) {
-            throw new Exception(sprintf('%s does not exist !', $fileName));
+        if ($filePath === null) {
+            throw new Exception('Cannot read: file path is null.');
         }
 
-        $sData = file_get_contents($fileName);
-
-        if ($sData === false) {
-            throw new Exception(sprintf('Content of file %s cannot be read', $fileName));
+        if (!is_file($filePath)) {
+            throw new Exception(sprintf('File does not exist: %s', $filePath));
         }
 
-        return $this->decode($sData);
+        $contents = @file_get_contents($filePath);
+
+        if ($contents === false) {
+            throw new Exception(sprintf('Unable to read file contents: %s', $filePath));
+        }
+
+        return $this->decode($contents);
     }
 }
